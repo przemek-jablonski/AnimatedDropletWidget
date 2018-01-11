@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.LinearLayoutCompat
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    >
+
+  <ImageView
+      android:layout_width="0dp"
+      android:layout_height="match_parent"
+      android:layout_weight="1"
+      android:background="@drawable/border"
+      app:srcCompat="?attr/colorAccent"
+      />
+
+  <ImageView
+      android:layout_width="0dp"
+      android:layout_height="match_parent"
+      android:layout_weight="1"
+      android:background="@drawable/border"
+      app:srcCompat="@color/materialOrange"
+      />
+
+  <ImageView
+      android:layout_width="0dp"
+      android:layout_height="match_parent"
+      android:layout_weight="1"
+      android:background="@drawable/border"
+      app:srcCompat="@color/materialBlue"
+      />
+
+  <ImageView
+      android:layout_width="0dp"
+      android:layout_height="match_parent"
+      android:layout_weight="1"
+      android:background="@drawable/border"
+      app:srcCompat="@color/materialGreen"
+      />
+  <ImageView
+      android:layout_width="0dp"
+      android:layout_height="match_parent"
+      android:layout_weight="1"
+      android:background="@drawable/border"
+      app:srcCompat="@color/materialBlack"
+      />
+
+  <ImageView
+      android:layout_width="0dp"
+      android:layout_height="match_parent"
+      android:layout_weight="1"
+      android:background="@drawable/border"
+      app:srcCompat="@color/materialGrey"
+      />
+
+  <ImageView
+      android:layout_width="0dp"
+      android:layout_height="match_parent"
+      android:layout_weight="1"
+      android:background="@drawable/border"
+      app:srcCompat="@color/materialWhite"
+      />
+
+
+</android.support.v7.widget.LinearLayoutCompat>
