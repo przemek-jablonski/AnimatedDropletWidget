@@ -70,7 +70,7 @@ private const val ATTRS_DROPLETS_THICKNESS_DISTRIBUTION = 1.00F
 
 //<editor-fold desc="Default XML attribute values for background layers">
 private const val ATTRS_BACKGROUND_MAX_DURATION = ATTRS_GLOBAL_MAX_DURATION
-private const val ATTRS_BACKGROUND_ENDSIZE_MAX = 1.00F
+private const val ATTRS_BACKGROUND_ENDSIZE_MAX = 100
 private const val ATTRS_BACKGROUND_COLOUR = ATTRS_GLOBAL_COLOUR
 private const val ATTRS_BACKGROUND_COLOUR_DISTRIBUTION = ATTRS_GLOBAL_COLOUR_DISTRIBUTION
 //</editor-fold>
@@ -158,7 +158,7 @@ open class AnimatedDropletWidget : FrameLayout {
   //todo: internal animation values should be stored as fields and shared between animations (with some multiplier)
 
   enum class WidgetPreset { NONE, DROPLETS, FLOW, RADAR, IRREGULAR }
-  private enum class WidgetInterpolator { PREDEFINED, ACCELERATE, DECELERATE, ACCELERATE_DECELERATE, BOUNCE, OVERSHOOT }
+  enum class WidgetInterpolator { PREDEFINED, ACCELERATE, DECELERATE, ACCELERATE_DECELERATE, BOUNCE, OVERSHOOT }
 
 
   constructor(context: Context) : this(context, null)
@@ -168,7 +168,6 @@ open class AnimatedDropletWidget : FrameLayout {
     context.theme.obtainStyledAttributes(attrs, R.styleable.AnimatedDropletWidget, defStyleAttr, 0)?.let { parseCustomAttributes(it) }
     applyCustomAtrributes()
     setupView()
-
 //    drawableView = createFrontDrawableView(drawable)
   }
 
@@ -177,12 +176,38 @@ open class AnimatedDropletWidget : FrameLayout {
   @CallSuper protected fun parseCustomAttributes(attrs: TypedArray) {
     Log.d("AnimatedDropletWidget", "parseCustomAttributes")
     try {
-
       drawableSrc = attrs.getResourceId(R.styleable.AnimatedDropletWidget_drawable_src, drawableSrc)
-      drawablePadding = attrs.getInt(R.styleable.AnimatedDropletWidget_drawable_padding, drawablePadding)
+      drawableSize = attrs.getInt(R.styleable.AnimatedDropletWidget_drawable_size, drawableSize)
       drawableAlpha = attrs.getInt(R.styleable.AnimatedDropletWidget_drawable_alpha, drawableAlpha)
+      preset.fromInt(attrs.getInt(R.styleable.AnimatedDropletWidget_preset, preset.ordinal))
+      dropletCount = attrs.getInt(R.styleable.AnimatedDropletWidget_droplet_count, dropletCount)
+      backgroundLayersCount = attrs.getInt(R.styleable.AnimatedDropletWidget_background_layers_count, backgroundLayersCount)
+      oneshotLayersCount = attrs.getInt(R.styleable.AnimatedDropletWidget_oneshot_count, oneshotLayersCount)
+      globalRandomInfluence = attrs.getFloat(R.styleable.AnimatedDropletWidget_global_random_influence, globalRandomInfluence)
+      globalMaxDuration = attrs.getInt(R.styleable.AnimatedDropletWidget_global_max_duration_ms, globalMaxDuration.toInt()).toLong() //todo: double casting here
+      globalColour = attrs.getResourceId(R.styleable.AnimatedDropletWidget_global_colour, globalColour)
+      globalColourDistribution = attrs.getFloat(R.styleable.AnimatedDropletWidget_global_colour_distribution, globalColourDistribution)
+      globalInterpolator.fromInt(attrs.getInt(R.styleable.AnimatedDropletWidget_global_interpolator, globalInterpolator.ordinal))
 
-      preset.fromInt(attrs.getInt(R.styleable.AnimatedDropletWidget_preset, WidgetPreset.NONE.ordinal))
+      dropletsMaxDuration = attrs.getInt(R.styleable.AnimatedDropletWidget_droplets_max_duration, dropletsMaxDuration.toInt()).toLong()
+      dropletsMaxDurationDistribution = attrs.getFloat(R.styleable.AnimatedDropletWidget_droplets_max_duration, dropletsMaxDurationDistribution)
+      dropletsSpawnsize = attrs.getInt(R.styleable.AnimatedDropletWidget_droplets_spawnsize, dropletsSpawnsize)
+      dropletsEndsizeMin = attrs.getInt(R.styleable.AnimatedDropletWidget_droplets_endsize_min, dropletsEndsizeMin)
+      dropletsEndsizeMax = attrs.getInt(R.styleable.AnimatedDropletWidget_droplets_endsize_max, dropletsEndsizeMax)
+      dropletsFadeout = attrs.getFloat(R.styleable.AnimatedDropletWidget_droplets_fadeout, dropletsFadeout)
+      dropletsThickness = attrs.getFloat(R.styleable.AnimatedDropletWidget_droplets_thickness, dropletsThickness)
+      dropletsThicknessDistribution = attrs.getFloat(R.styleable.AnimatedDropletWidget_droplets_thickness_distribution, dropletsThicknessDistribution)
+      dropletsInterpolator.fromInt(attrs.getInt(R.styleable.AnimatedDropletWidget_droplets_interpolator, dropletsInterpolator.ordinal))
+
+      backgroundMaxDuration = attrs.getInt(R.styleable.AnimatedDropletWidget_background_max_duration, backgroundMaxDuration.toInt()).toLong()
+      backgroundEndsizeMax = attrs.getInt(R.styleable.AnimatedDropletWidget_background_endsize_max, backgroundEndsizeMax)
+      backgroundColour = attrs.getResourceId(R.styleable.AnimatedDropletWidget_background_colour, backgroundColour)
+      backgroundColourDistribution = attrs.getFloat(R.styleable.AnimatedDropletWidget_background_colour_distibution, backgroundColourDistribution)
+      backgroundInterpolator.fromInt(attrs.getInt(R.styleable.AnimatedDropletWidget_background_interpolator, backgroundInterpolator.ordinal))
+
+      oneshotColour = attrs.getResourceId(R.styleable.AnimatedDropletWidget_oneshot_colour, oneshotColour)
+      oneshotInterpolator.fromInt(attrs.getInt(R.styleable.AnimatedDropletWidget_oneshot_interpolator, oneshotInterpolator.ordinal))
+
 
       attrs.getInt(R.styleable.AnimatedDropletWidget_global_max_duration_ms, globalMaxDuration.toInt()).toLong()
           .apply {
@@ -332,6 +357,7 @@ open class AnimatedDropletWidget : FrameLayout {
 
   //<editor-fold desc="Animate views">
   @SuppressLint("LogConditional")
+  //todo: add endsize to this
   private fun animateCircularBackground(targetView: View, startTime: Millis, duration: Millis, repeatDelay: Millis,
       pathRandomFactor: Float) {
     Log.d("AnimatedDropletWidget", "animateCircularBackground, targetView: ${targetView.asString()}")

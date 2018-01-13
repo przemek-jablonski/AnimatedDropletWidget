@@ -10,6 +10,7 @@ import android.view.animation.Animation
 import android.view.animation.Animation.AnimationListener
 import android.view.animation.AnimationSet
 import android.widget.ImageView
+import com.android.szparag.animateddropletwidget.AnimatedDropletWidget.WidgetInterpolator
 import com.android.szparag.animateddropletwidget.AnimatedDropletWidget.WidgetPreset
 import com.android.szparag.animateddropletwidget.AnimatedDropletWidget.WidgetPreset.NONE
 import java.util.Random
@@ -101,6 +102,13 @@ fun Any.asShortString() = "${this::class.java.simpleName}@${hashCode()}"
 
 fun WidgetPreset.fromInt(ordinal: Int, default: WidgetPreset = WidgetPreset.values()[0]): WidgetPreset {
   WidgetPreset.values()
+      .filter { it.ordinal == ordinal }
+      .forEach { return it }
+  return default
+}
+
+fun WidgetInterpolator.fromInt(ordinal: Int, default: WidgetInterpolator = WidgetInterpolator.values()[0]): WidgetInterpolator {
+  WidgetInterpolator.values()
       .filter { it.ordinal == ordinal }
       .forEach { return it }
   return default
