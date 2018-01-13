@@ -1,6 +1,9 @@
 package com.android.szparag.animateddropletwidget
 
+import android.R.color
+import android.annotation.SuppressLint
 import android.content.Context
+import android.content.res.TypedArray
 import android.graphics.Paint.Style.FILL
 import android.graphics.Paint.Style.STROKE
 import android.graphics.Path
@@ -26,13 +29,58 @@ import android.view.animation.Interpolator
 import android.view.animation.PathInterpolator
 import android.view.animation.ScaleAnimation
 import android.widget.FrameLayout
-import android.widget.ImageView
 import java.util.Random
+
+typealias Millis = Long
+typealias ResourceId = Int
+typealias Percentage = Int
 
 /**
  * Created by Przemyslaw Jablonski (github.com/sharaquss, pszemek.me) on 15/11/2017.
  */
 
+
+//<editor-fold desc="Default XML attribute values for global settings">
+private const val ATTRS_DROPLET_COUNT = 5
+private const val ATTRS_BACKGROUND_LAYERS_COUNT = 2
+private const val ATTRS_ONESHOT_COUNT = 1
+private const val ATTRS_GLOBAL_RANDOM_INFLUENCE = 1.00F
+private const val ATTRS_GLOBAL_MAX_DURATION: Millis = 5000 //todo: BASE_ANIMATION_LENGTH_MILLIS?
+private const val ATTRS_GLOBAL_COLOUR = color.holo_red_dark
+private const val ATTRS_GLOBAL_COLOUR_DISTRIBUTION = 1.00F
+//</editor-fold>
+
+//<editor-fold desc="Default XML attribute values for drawable layer">
+private const val ATTRS_DRAWABLE = android.R.mipmap.sym_def_app_icon
+private const val ATTRS_DRAWABLE_SIZE = 75
+private const val ATTRS_DRAWABLE_ALPHA = 100
+//</editor-fold>
+
+//<editor-fold desc="Default XML attribute values for droplets layers">
+private const val ATTRS_DROPLETS_MAX_DURATION = ATTRS_GLOBAL_MAX_DURATION
+private const val ATTRS_DROPLETS_MAX_DURATION_DISTRIBUTION = 1.00F
+private const val ATTRS_DROPLETS_SPAWNSIZE = 0
+private const val ATTRS_DROPLETS_ENDSIZE_MAX = 100
+private const val ATTRS_DROPLETS_ENDSIZE_MIN =
+    ATTRS_DRAWABLE_SIZE + (ATTRS_DROPLETS_ENDSIZE_MAX - ATTRS_DROPLETS_ENDSIZE_MAX) / 3 //todo: this 3 as constant
+private const val ATTRS_DROPLETS_FADEOUT = 1.00F
+private const val ATTRS_DROPLETS_THICKNESS = 1.00F
+private const val ATTRS_DROPLETS_THICKNESS_DISTRIBUTION = 1.00F
+//</editor-fold>
+
+//<editor-fold desc="Default XML attribute values for background layers">
+private const val ATTRS_BACKGROUND_MAX_DURATION = ATTRS_GLOBAL_MAX_DURATION
+private const val ATTRS_BACKGROUND_ENDSIZE_MAX = 1.00F
+private const val ATTRS_BACKGROUND_COLOUR = ATTRS_GLOBAL_COLOUR
+private const val ATTRS_BACKGROUND_COLOUR_DISTRIBUTION = ATTRS_GLOBAL_COLOUR_DISTRIBUTION
+//</editor-fold>
+
+//<editor-fold desc="Default XML attribute values for One-Shot layers">
+private const val ATTRS_ONESHOT_MAX_DURATION = ATTRS_DROPLETS_MAX_DURATION
+private const val ATTRS_ONESHOT_COLOUR = ATTRS_GLOBAL_COLOUR
+//</editor-fold>
+
+//<editor-fold desc="Default internal values">
 private const val BASE_ANIMATION_LENGTH_MILLIS = 5000L
 private const val BASE_ANIMATION_LENGTH_MIN_MILLIS = (BASE_ANIMATION_LENGTH_MILLIS * 0.66f).toLong()
 private const val BASE_ANIMATION_REPEAT_DELAY_MILLIS = BASE_ANIMATION_LENGTH_MILLIS / 2
@@ -41,15 +89,57 @@ private const val BASE_ANIMATION_BACKGROUND_REPEAT_DELAY_MILLIS = BASE_ANIMATION
 private const val BASE_OVAL_STROKE_THICKNESS = 50f
 private const val ANIMATION_RANDOM_START_TIME_BOUND_MILLIS = BASE_ANIMATION_LENGTH_MILLIS * 2
 private const val ANIMATION_RANDOM_REPEAT_DELAY_BOUND_MILLIS = ANIMATION_RANDOM_START_TIME_BOUND_MILLIS * 2.50
+//</editor-fold>
 
-typealias Millis = Long
-typealias ResourceId = Int
-typealias Percentage = Float
-
+@SuppressLint("LogNotTimber") //todo: temporary, remove that
 open class AnimatedDropletWidget : FrameLayout {
 
+  //<editor-fold desc="View properties">
+  /**
+   * View properties.
+   * Populated with constants with default xml attributes at creation time.
+   * Some of those can be overwritten if user chooses to do so in xml
+   * @see parseCustomAttributes
+   */
+  private var preset = WidgetPreset.NONE
+
+  @DrawableRes private var drawableSrc = ATTRS_DRAWABLE
+  private var drawableSize = ATTRS_DRAWABLE_SIZE
+  private var drawableAlpha = ATTRS_DRAWABLE_ALPHA
+
+  private var dropletCount = ATTRS_DROPLET_COUNT
+  private var backgroundLayersCount = ATTRS_BACKGROUND_LAYERS_COUNT
+  private var oneshotLayersCount = ATTRS_ONESHOT_COUNT
+  private var globalRandomInfluence = ATTRS_GLOBAL_RANDOM_INFLUENCE
+  private var globalMaxDuration: Millis = ATTRS_GLOBAL_MAX_DURATION
+  private var globalColour = ATTRS_GLOBAL_COLOUR
+  private var globalColourDistribution = ATTRS_GLOBAL_COLOUR_DISTRIBUTION
+  private var globalInterpolator = WidgetInterpolator.PREDEFINED
+
+  private var dropletsMaxDuration = ATTRS_DROPLETS_MAX_DURATION
+  private var dropletsMaxDurationDistribution = ATTRS_DROPLETS_MAX_DURATION_DISTRIBUTION
+  private var dropletsSpawnsize = ATTRS_DROPLETS_SPAWNSIZE
+  private var dropletsEndsizeMin = ATTRS_DROPLETS_ENDSIZE_MIN
+  private var dropletsEndsizeMax = ATTRS_DROPLETS_ENDSIZE_MAX
+  private var dropletsFadeout = ATTRS_DROPLETS_FADEOUT //todo: what is that?
+  private var dropletsThickness = ATTRS_DROPLETS_THICKNESS
+  private var dropletsThicknessDistribution = ATTRS_DROPLETS_THICKNESS_DISTRIBUTION
+  private var dropletsInterpolator = WidgetInterpolator.PREDEFINED //todo: should it be predefined?
+
+  var backgroundMaxDuration = ATTRS_BACKGROUND_MAX_DURATION
+  var backgroundEndsizeMin = drawableSize
+  var backgroundEndsizeMax = ATTRS_BACKGROUND_ENDSIZE_MAX
+  private var backgroundColour = ATTRS_BACKGROUND_COLOUR
+  private var backgroundColourDistribution = ATTRS_BACKGROUND_COLOUR_DISTRIBUTION
+  private var backgroundInterpolator = WidgetInterpolator.DECELERATE //todo: ?
+
+  var oneshotMaxDuration = ATTRS_ONESHOT_MAX_DURATION
+  var oneshotColour = ATTRS_ONESHOT_COLOUR
+  private var oneshotInterpolator = WidgetInterpolator.ACCELERATE_DECELERATE
+  //</editor-fold>
+
   //todo: unify - there are vars, lateinit vars and vals here
-  private var drawableView: ImageView
+//  private var drawableView: ImageView
   private lateinit var circularDropletBackgroundView1: View //todo: 1? 2? wtf
   private lateinit var circularDropletBackgroundView2: View //todo: to layers with layer count as a parameter
   //  private val circularBackgroundViewLayers = arrayListOf<View>()
@@ -60,46 +150,66 @@ open class AnimatedDropletWidget : FrameLayout {
 
   private val random by lazy { Random() }
 
-  @DrawableRes private var drawable = android.R.color.transparent
 
-//  private var drawableMargin: Int = 0
-//  private var dropletSpeed: Int = 1
-//  private var dropletFadeout: Int = 1
   //todo: drawable layoutParams in xml - maybe someone wants drawable to be WRAP_CONTENT?
-  //todo: parse so that srcCompat / src can be used to specify Drawable used
 
-  //todo: callback (with default implementation) onUserClicked()
-  //todo: callback (with default implementation) onUserLongPressed()
-  //todo: performOneShotDroplet
-  //todo: color(s?) as params (reference)
-  //todo: interpolators as params (enum)
-  //todo: staralpha as a param
-  //todo: endalpha as a param
-  //todo: repeatoffset as a param
+  //todo: callbacks: onOneShotAnimationStarted() / onOneShotAnimationFinished()
+  //todo: callbacks: onBackgroundLayerAnimationStarted() / onDropletLayerAnimationStarted()
   //todo: internal animation values should be stored as fields and shared between animations (with some multiplier)
-  //TODO: MAKE PATH INTERPOLATOR, SO THAT IT STARTS WITH 0 ALPHA, THEN GOES FAST TO MAX ALPHA AND FADES TO 0 AGAIN!!!
-  //todo: make method oneShotCircle, so that when battery status changes, it is reflected in animation as well!
-  //todo:
+
+  enum class WidgetPreset { NONE, DROPLETS, FLOW, RADAR, IRREGULAR }
+  private enum class WidgetInterpolator { PREDEFINED, ACCELERATE, DECELERATE, ACCELERATE_DECELERATE, BOUNCE, OVERSHOOT }
+
 
   constructor(context: Context) : this(context, null)
   constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
   constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
     Log.d("AnimatedDropletWidget", "ctor")
-    parseCustomAttributes()
+    context.theme.obtainStyledAttributes(attrs, R.styleable.AnimatedDropletWidget, defStyleAttr, 0)?.let { parseCustomAttributes(it) }
     applyCustomAtrributes()
     setupView()
 
-    drawableView = createFrontDrawableView(drawable)
+//    drawableView = createFrontDrawableView(drawable)
   }
 
   //<editor-fold desc="Parsing xml attributes (if any)">
   //todo: typedarray as input
-  @CallSuper protected fun parseCustomAttributes() {
+  @CallSuper protected fun parseCustomAttributes(attrs: TypedArray) {
     Log.d("AnimatedDropletWidget", "parseCustomAttributes")
+    try {
+
+      drawableSrc = attrs.getResourceId(R.styleable.AnimatedDropletWidget_drawable_src, drawableSrc)
+      drawablePadding = attrs.getInt(R.styleable.AnimatedDropletWidget_drawable_padding, drawablePadding)
+      drawableAlpha = attrs.getInt(R.styleable.AnimatedDropletWidget_drawable_alpha, drawableAlpha)
+
+      preset.fromInt(attrs.getInt(R.styleable.AnimatedDropletWidget_preset, WidgetPreset.NONE.ordinal))
+
+      attrs.getInt(R.styleable.AnimatedDropletWidget_global_max_duration_ms, globalMaxDuration.toInt()).toLong()
+          .apply {
+            globalMaxDuration = this
+            backgroundMaxDuration = this
+            dropletsMaxDuration = this
+            oneshotMaxDuration = this
+          }
+
+      attrs.getInt(R.styleable.AnimatedDropletWidget_droplets_max_duration, dropletsMaxDuration.toInt()).toLong()
+          .apply {
+            dropletsMaxDuration = this
+            oneshotMaxDuration = this
+          }
+
+      backgroundMaxDuration =
+          attrs.getInt(R.styleable.AnimatedDropletWidget_background_max_duration, backgroundMaxDuration.toInt()).toLong()
+
+
+    } finally {
+      attrs.recycle()
+    }
   }
 
   @CallSuper protected fun applyCustomAtrributes() {
     Log.d("AnimatedDropletWidget", "applyCustomAtrributes")
+    globalMaxDuration
   }
   //</editor-fold>
 
@@ -107,7 +217,6 @@ open class AnimatedDropletWidget : FrameLayout {
     Log.d("AnimatedDropletWidget", "setupView")
     addOnLayoutChangeListener(this::onLayoutBoundsChanged)
     clipChildren = false
-    drawable = android.R.mipmap.sym_def_app_icon//todo hardcoded
   }
 
   private fun onLayoutBoundsChanged(view: View, left: Int, top: Int, right: Int, bottom: Int, oldLeft: Int, oldTop: Int, oldRight: Int,
@@ -130,9 +239,10 @@ open class AnimatedDropletWidget : FrameLayout {
         }
 
     //todo: this is not elegant
-    addView(drawableView)
+//    addView(drawableView)
   }
 
+  @SuppressLint("LogConditional")
   private fun createCircularDropletsLayers(layerCount: Int) {
     Log.d("AnimatedDropletWidget", "createCircularDropletsLayers, layerCount: $layerCount")
     (0 until layerCount).mapTo(circularDropletViewLayers) { layerIndex ->
@@ -149,6 +259,7 @@ open class AnimatedDropletWidget : FrameLayout {
   }
 
   //todo: 2 is hardcoded
+  @SuppressLint("LogConditional")
   private fun createCircularDropletBackgroundLayers(layerCount: Int) {
     Log.d("AnimatedDropletWidget", "createCircularDropletBackgroundLayers, layerCount: $layerCount")
     (0 until layerCount).mapTo(circularDropletBackgroundLayers) { layerIndex ->
@@ -179,10 +290,12 @@ open class AnimatedDropletWidget : FrameLayout {
 
 
   //<editor-fold desc="Creating views">
+  @SuppressLint("LogConditional")
   private fun createCircularDropletView(thickness: Float, @ColorRes colourId: ResourceId)
       = createImageViewWithDrawable(context, createCircularDropletDrawable(thickness, colourId))
       .also { Log.d("AnimatedDropletWidget", "createCircularDropletView, thickness: $thickness, view: ${it.asString()}") }
 
+  @SuppressLint("LogConditional")
   private fun createCircularBackgroundView(@ColorRes colourId: ResourceId)
       = createImageViewWithDrawable(context, createCircularBackgroundDrawable(colourId))
       .also { Log.d("AnimatedDropletWidget", "createCircularBackgroundView, view: ${it.asString()}") }
@@ -190,6 +303,7 @@ open class AnimatedDropletWidget : FrameLayout {
 
 
   //<editor-fold desc="Creating drawables">
+  @SuppressLint("LogConditional")
   private fun createCircularDropletDrawable(strokeThickness: Float, @ColorRes colourId: ResourceId) =
       ShapeDrawable(OvalShape()).apply {
         this.intrinsicHeight = this@AnimatedDropletWidget.height
@@ -201,6 +315,7 @@ open class AnimatedDropletWidget : FrameLayout {
         Log.d("AnimatedDropletWidget", "createCircularDropletDrawable, drawable: ${it.asString()}")
       }
 
+  @SuppressLint("LogConditional")
   private fun createCircularBackgroundDrawable(@ColorRes colourId: ResourceId) =
       ShapeDrawable(OvalShape()).apply {
         this.intrinsicHeight = this@AnimatedDropletWidget.height
@@ -216,6 +331,7 @@ open class AnimatedDropletWidget : FrameLayout {
   //</editor-fold>
 
   //<editor-fold desc="Animate views">
+  @SuppressLint("LogConditional")
   private fun animateCircularBackground(targetView: View, startTime: Millis, duration: Millis, repeatDelay: Millis,
       pathRandomFactor: Float) {
     Log.d("AnimatedDropletWidget", "animateCircularBackground, targetView: ${targetView.asString()}")
@@ -246,6 +362,7 @@ open class AnimatedDropletWidget : FrameLayout {
         }.start()
   }
 
+  @SuppressLint("LogConditional")
   private fun animateCircularDroplet(targetView: View, layerIndex: Int, layerCount: Int, layerDependency: Float) {
     val startTime = random.nextInt(ANIMATION_RANDOM_START_TIME_BOUND_MILLIS.toInt()).toLong()
     val repeatDelayAddition = random.nextInt(ANIMATION_RANDOM_REPEAT_DELAY_BOUND_MILLIS.toInt()).toLong()
@@ -289,6 +406,7 @@ open class AnimatedDropletWidget : FrameLayout {
   //</editor-fold>
 
   //<editor-fold desc="Animations builders">
+  @SuppressLint("LogConditional")
   private fun createScalingAnimation(parentContainer: View, duration: Millis, startTime: Millis, repeatDelay: Millis,
       xyStart: Float, xyEnd: Float, interpolator: Interpolator, timeCutoff: Float = 1.0f, oneShot: Boolean = false)
       = ScaleAnimation(xyStart, xyEnd, xyStart, xyEnd, parentContainer.width / 2f, parentContainer.height / 2f)
@@ -304,6 +422,7 @@ open class AnimatedDropletWidget : FrameLayout {
       }
 
 
+  @SuppressLint("LogConditional")
   private fun createFadeoutAnimation(parentContainer: View, duration: Millis, startTime: Millis, repeatDelay: Millis,
       alphaStart: Float, alphaEnd: Float, interpolator: Interpolator, timeCutoff: Float, oneShot: Boolean = false) =
       AlphaAnimation(alphaStart, alphaEnd)

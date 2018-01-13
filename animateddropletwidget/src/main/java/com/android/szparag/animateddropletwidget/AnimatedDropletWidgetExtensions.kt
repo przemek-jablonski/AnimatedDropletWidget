@@ -10,6 +10,8 @@ import android.view.animation.Animation
 import android.view.animation.Animation.AnimationListener
 import android.view.animation.AnimationSet
 import android.widget.ImageView
+import com.android.szparag.animateddropletwidget.AnimatedDropletWidget.WidgetPreset
+import com.android.szparag.animateddropletwidget.AnimatedDropletWidget.WidgetPreset.NONE
 import java.util.Random
 
 typealias Widget = View
@@ -96,3 +98,10 @@ fun Drawable.asStringPreKitkat() = "${this::class.java.simpleName}@${hashCode()}
     .intrinsicHeight}, iWidth: ${this.intrinsicWidth}, opacity: ${this.opacity}, visible: ${this.isVisible}"
 
 fun Any.asShortString() = "${this::class.java.simpleName}@${hashCode()}"
+
+fun WidgetPreset.fromInt(ordinal: Int, default: WidgetPreset = WidgetPreset.values()[0]): WidgetPreset {
+  WidgetPreset.values()
+      .filter { it.ordinal == ordinal }
+      .forEach { return it }
+  return default
+}

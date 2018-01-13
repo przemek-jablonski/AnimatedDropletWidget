@@ -3,11 +3,17 @@
 
   <declare-styleable name="AnimatedDropletWidget">
 
+
+    <attr format="reference" name="drawable_src"/>
+    <attr format="integer" name="drawable_size"/>
+    <attr format="integer" name="drawable_alpha"/>
+
     <attr format="enum" name="preset">
-      <enum name="droplets" value="0"/>
-      <enum name="flow" value="1"/>
-      <enum name="radar" value="2"/>
-      <enum name="irregular" value="3"/>
+      <enum name="none" value="0"/>
+      <enum name="droplets" value="1"/>
+      <enum name="flow" value="2"/>
+      <enum name="radar" value="3"/>
+      <enum name="irregular" value="4"/>
     </attr>
 
     <attr format="integer" name="droplet_count"/>
@@ -15,29 +21,16 @@
     <attr format="integer" name="oneshot_count"/>
 
     <attr format="float" name="global_random_influence"/>
-    <attr format="integer" name="global_max_duration"/>
+    <attr format="integer" name="global_max_duration_ms"/>
     <attr format="reference" name="global_colour"/>
     <attr format="float" name="global_colour_distribution"/>
     <attr format="enum" name="global_interpolator">
-      <enum name="predefined" value="-1"/>
-      <enum name="accelerate" value="0"/>
-      <enum name="decelerate" value="1"/>
-      <enum name="accelerate_decelerate" value="2"/>
-      <enum name="bounce" value="3"/>
-      <enum name="overshoot" value="4"/>
-    </attr>
-
-    <attr format="integer" name="background_max_duration"/> <!-- fallback to global_max_duration if not set-->
-    <attr format="integer" name="background_endsize_max"/> <!-- fallback to droplet_endsize_max if not set-->
-    <attr format="reference" name="background_colour"/> <!-- fallback to global_colour if not set-->
-    <attr format="float" name="background_colour_distibution"/> <!-- fallback to global_colour if not set-->
-    <attr format="enum" name="background_interpolator"> <!-- fallback to global_interpolator if not set-->
-      <enum name="predefined" value="-1"/>
-      <enum name="accelerate" value="0"/>
-      <enum name="decelerate" value="1"/>
-      <enum name="accelerate_decelerate" value="2"/>
-      <enum name="bounce" value="3"/>
-      <enum name="overshoot" value="4"/>
+      <enum name="predefined" value="0"/>
+      <enum name="accelerate" value="1"/>
+      <enum name="decelerate" value="2"/>
+      <enum name="accelerate_decelerate" value="3"/>
+      <enum name="bounce" value="4"/>
+      <enum name="overshoot" value="5"/>
     </attr>
 
     <attr format="integer" name="droplets_max_duration"/>
@@ -48,133 +41,39 @@
     <attr format="float" name="droplets_fadeout"/>
     <attr format="float" name="droplets_thickness"/>
     <attr format="float" name="droplets_thickness_distribution"/>
-    <attr format="enum" name="droplet_interpolator"> <!-- fallback to global_interpolator if not set-->
-      <enum name="predefined" value="-1"/>
-      <enum name="accelerate" value="0"/>
-      <enum name="decelerate" value="1"/>
-      <enum name="accelerate_decelerate" value="2"/>
-      <enum name="bounce" value="3"/>
-      <enum name="overshoot" value="4"/>
+    <attr format="enum" name="droplets_interpolator"> <!-- fallback to global_interpolator if not set-->
+      <enum name="predefined" value="0"/>
+      <enum name="accelerate" value="1"/>
+      <enum name="decelerate" value="2"/>
+      <enum name="accelerate_decelerate" value="3"/>
+      <enum name="bounce" value="4"/>
+      <enum name="overshoot" value="5"/>
     </attr>
+
+    <attr format="integer" name="background_max_duration"/> <!-- fallback to global_max_duration if not set-->
+    <attr format="integer" name="background_endsize_max"/> <!-- fallback to droplet_endsize_max if not set-->
+    <attr format="reference" name="background_colour"/> <!-- fallback to global_colour if not set-->
+    <attr format="float" name="background_colour_distibution"/> <!-- fallback to global_colour if not set-->
+    <attr format="enum" name="background_interpolator"> <!-- fallback to global_interpolator if not set-->
+      <enum name="predefined" value="0"/>
+      <enum name="accelerate" value="1"/>
+      <enum name="decelerate" value="2"/>
+      <enum name="accelerate_decelerate" value="3"/>
+      <enum name="bounce" value="4"/>
+      <enum name="overshoot" value="5"/>
+    </attr>
+
+
 
     <attr format="reference" name="oneshot_colour"/>
     <attr format="enum" name="oneshot_interpolator"> <!-- fallback to global_interpolator if not set-->
-      <enum name="predefined" value="-1"/>
-      <enum name="accelerate" value="0"/>
-      <enum name="decelerate" value="1"/>
-      <enum name="accelerate_decelerate" value="2"/>
-      <enum name="bounce" value="3"/>
-      <enum name="overshoot" value="4"/>
+      <enum name="predefined" value="0"/>
+      <enum name="accelerate" value="1"/>
+      <enum name="decelerate" value="2"/>
+      <enum name="accelerate_decelerate" value="3"/>
+      <enum name="bounce" value="4"/>
+      <enum name="overshoot" value="5"/>
     </attr>
-
-    <attr format="reference" name="drawable_src"/>
-    <attr format="integer" name="drawable_padding"/>
-    <attr format="float" name="drawable_alpha"/>
-
-
-    <!--<attr name=""-->
-
-    <!--&lt;!&ndash;i think all of those settings should have _max_ in their name, cause this is what they are &ndash;&gt;-->
-
-    <!--<attr name="droplet_duration" format="float"/>-->
-    <!--&lt;!&ndash;-->
-    <!--multiplier of predefined value-->
-    <!--&ndash;&gt;-->
-    <!--<attr name="droplet_duration_dependency" format="float"/>-->
-    <!--&lt;!&ndash;-->
-    <!--1.0 -> top layer will be 1.00f duration, bottom 0.5f duration-->
-    <!--0.0 -> top layer will be 1.00f duration, bottom 1.00f duration-->
-    <!--2.0 -> top layer will be 1.00f duration, bottom 0f duration-->
-    <!--&ndash;&gt;-->
-
-    <!--&lt;!&ndash;todo:<attr name="droplet_repeatdelay_max" format=""&ndash;&gt;-->
-
-    <!--<attr name="droplet_fadeout" format="float"/>-->
-    <!--&lt;!&ndash;-->
-    <!--multiplier of predefined value-->
-    <!--&ndash;&gt;-->
-    <!--<attr name="droplet_fadeout_dependency" format="float"/>-->
-    <!--&lt;!&ndash;-->
-    <!--1.0 -> top layer will be 1.00f fadeout, bottom 0.5f fadeout-->
-    <!--0.0 -> top layer will be 1.00f fadeout, bottom 1.00f fadeout-->
-    <!--2.0 -> top layer will be 1.00f fadeout, bottom 0f fadeout-->
-    <!--&ndash;&gt;-->
-    <!--<attr name="droplet_colour" format="reference"/>-->
-    <!--<attr name="droplet_colour_dependency" format="float"/>-->
-    <!--&lt;!&ndash;-->
-    <!--1.0 -> top layer will be 1.00f colour alpha, bottom 0.5f colour alpha-->
-    <!--0.0 -> top layer will be 1.00f colour alpha, bottom 1.00f colour alpha-->
-    <!--2.0 -> top layer will be 1.00f colour alpha, bottom 0f colour alpha-->
-    <!--&ndash;&gt;-->
-
-
-    <!--<attr name="droplet_thickness" format="float"/>-->
-    <!--&lt;!&ndash;-->
-    <!--multiplier of predefined value-->
-    <!--&ndash;&gt;-->
-    <!--<attr name="droplet_thickness_dependency" format="float"/>-->
-    <!--&lt;!&ndash;-->
-    <!--1.0 -> top layer will be 1.00f thickness, bottom 0.5f thickness-->
-    <!--0.0 -> top layer will be 1.00f thickness, bottom 1.00f thickness-->
-    <!--2.0 -> top layer will be 1.00f thickness, bottom 0f thickness-->
-    <!--&ndash;&gt;-->
-
-    <!--<attr name="droplet_min_spawned_size" format="integer"/>-->
-    <!--&lt;!&ndash;-->
-    <!--percent of view total size-->
-    <!--&ndash;&gt;-->
-
-    <!--&lt;!&ndash;todo: diff between them will be lerped evenly&ndash;&gt;-->
-    <!--<attr name="droplet_min_size" format="integer"/>-->
-    <!--&lt;!&ndash;-->
-    <!--percent of view total size-->
-    <!--&ndash;&gt;-->
-    <!--<attr name="droplet_max_size" format="integer"/>-->
-    <!--&lt;!&ndash;-->
-    <!--percent of view total size-->
-    <!--&ndash;&gt;-->
-
-    <!--&lt;!&ndash;todo: repeat delay should be 0!&ndash;&gt;-->
-    <!--&lt;!&ndash;todo: starttime should be duration lerped evenly&ndash;&gt;-->
-
-    <!--&lt;!&ndash;todo: this needs to be evenly distributed, but with emphasis on bigger values, if possible&ndash;&gt;-->
-    <!--&lt;!&ndash;todo: 0.00f <-> 1.00f ==> 0.00f&ndash;&gt;-->
-    <!--&lt;!&ndash;<attr name="droplet_spawned_size_difference_dependency" format="float"/>&ndash;&gt;-->
-    <!--&lt;!&ndash;&lt;!&ndash;&ndash;&gt;-->
-    <!--&lt;!&ndash;1.0 -> top layer will be 1.00f * max, bottom 1.00f * min&ndash;&gt;-->
-    <!--&lt;!&ndash;0.0 -> top layer will be 1.00f percent of view total size, bottom 1.00f percent of view total size&ndash;&gt;-->
-    <!--&lt;!&ndash;2.0 -> top layer will be 1.00f percent of view total size, bottom 0f percent of view total size&ndash;&gt;-->
-    <!--&lt;!&ndash;&ndash;&gt;&ndash;&gt;-->
-
-    <!--<attr name="droplet_speed_interpolator" format="enum">-->
-    <!--<enum name="predefined" value="-1"/>-->
-    <!--<enum name="accelerate" value="0"/>-->
-    <!--<enum name="decelerate" value="1"/>-->
-    <!--<enum name="accelerate_decelerate" value="2"/>-->
-    <!--<enum name="bounce" value="3"/>-->
-    <!--<enum name="overshoot" value="4"/>-->
-    <!--</attr>-->
-
-
-    <!--<attr name="background_colour" format="reference"/>-->
-    <!--<attr name="background_colour_dependency" format="float"/>-->
-    <!--&lt;!&ndash;-->
-    <!--1.0 -> top layer will be 1.00f colour alpha, bottom 0.5f colour alpha-->
-    <!--0.0 -> top layer will be 1.00f colour alpha, bottom 1.00f colour alpha-->
-    <!--2.0 -> top layer will be 1.00f colour alpha, bottom 0f colour alpha-->
-    <!--&ndash;&gt;-->
-
-    <!--<attr name="background_duration" format="float"/>-->
-    <!--&lt;!&ndash;-->
-    <!--multiplier of predefined value-->
-    <!--&ndash;&gt;-->
-    <!--<attr name="background_duration_dependency" format="float"/>-->
-    <!--&lt;!&ndash;-->
-    <!--1.0 -> top layer will be 1.00f duration, bottom 0.5f duration-->
-    <!--0.0 -> top layer will be 1.00f duration, bottom 1.00f duration-->
-    <!--2.0 -> top layer will be 1.00f duration, bottom 0f duration-->
-    <!--&ndash;&gt;-->
-
 
   </declare-styleable>
 

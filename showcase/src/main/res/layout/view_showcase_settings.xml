@@ -370,48 +370,7 @@
       app:layout_constraintVertical_bias="0.588"
       style="@style/Widget.AppCompat.SeekBar"
       />
-  <ImageView
-      android:id="@+id/iconInfoa"
-      android:layout_width="16sp"
-      android:layout_height="16sp"
-      android:layout_marginBottom="8dp"
-      android:layout_marginEnd="8dp"
-      android:layout_marginStart="8dp"
-      android:layout_marginTop="8dp"
-      app:layout_constraintBottom_toBottomOf="@+id/textLabela6"
-      app:layout_constraintEnd_toStartOf="@+id/guidelineInfoIconRight"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toTopOf="@+id/textLabela6"
-      app:srcCompat="@drawable/ic_action_info_dark"
-      />
-  <TextView
-      android:id="@+id/textLabela"
-      android:layout_width="0dp"
-      android:layout_height="wrap_content"
-      android:layout_marginEnd="4dp"
-      android:layout_marginStart="4dp"
-      android:layout_marginTop="8dp"
-      android:fontFamily="monospace"
-      android:gravity="center"
-      android:text="Base colour dependency:"
-      app:layout_constraintEnd_toStartOf="@+id/guidelineLabelTextRight"
-      app:layout_constraintStart_toStartOf="@+id/guidelineInfoIconRight"
-      app:layout_constraintTop_toBottomOf="@id/textLabela5"
-      />
-  <SeekBar
-      android:id="@+id/contenta"
-      android:layout_width="0dp"
-      android:layout_height="wrap_content"
-      android:layout_marginLeft="4dp"
-      android:layout_marginStart="4dp"
-      android:max="100"
-      android:progress="50"
-      app:layout_constraintBottom_toBottomOf="@+id/textLabela6"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintStart_toStartOf="@+id/guidelineLabelTextRight"
-      app:layout_constraintTop_toTopOf="@+id/textLabela6"
-      style="@style/Widget.AppCompat.SeekBar"
-      />
+
   <ImageView
       android:id="@+id/iconInfoa9"
       android:layout_width="16sp"
@@ -420,10 +379,10 @@
       android:layout_marginEnd="8dp"
       android:layout_marginStart="8dp"
       android:layout_marginTop="8dp"
-      app:layout_constraintBottom_toBottomOf="@+id/textLabela7"
+      app:layout_constraintBottom_toBottomOf="@+id/textLabela9"
       app:layout_constraintEnd_toStartOf="@+id/guidelineInfoIconRight"
       app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toTopOf="@+id/textLabela7"
+      app:layout_constraintTop_toTopOf="@+id/textLabela9"
       app:srcCompat="@drawable/ic_action_info_dark"
       />
   <TextView
@@ -432,56 +391,14 @@
       android:layout_height="wrap_content"
       android:layout_marginEnd="4dp"
       android:layout_marginStart="4dp"
-      android:layout_marginTop="8dp"
-      android:fontFamily="monospace"
-      android:gravity="center"
-      android:text="Thickness:"
-      app:layout_constraintEnd_toStartOf="@+id/guidelineLabelTextRight"
-      app:layout_constraintStart_toStartOf="@+id/guidelineInfoIconRight"
-      app:layout_constraintTop_toBottomOf="@id/textLabela6"
-      />
-  <SeekBar
-      android:id="@+id/contenta5"
-      android:layout_width="0dp"
-      android:layout_height="wrap_content"
-      android:layout_marginLeft="4dp"
-      android:layout_marginStart="4dp"
-      android:max="200"
-      android:progress="100"
-      app:layout_constraintBottom_toBottomOf="@+id/textLabela7"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintStart_toStartOf="@+id/guidelineLabelTextRight"
-      app:layout_constraintTop_toTopOf="@+id/textLabela7"
-      style="@style/Widget.AppCompat.SeekBar"
-      />
-  <ImageView
-      android:id="@+id/iconInfoa10"
-      android:layout_width="16sp"
-      android:layout_height="16sp"
-      android:layout_marginBottom="8dp"
-      android:layout_marginEnd="8dp"
-      android:layout_marginStart="8dp"
-      android:layout_marginTop="8dp"
-      app:layout_constraintBottom_toBottomOf="@+id/textLabela8"
-      app:layout_constraintEnd_toStartOf="@+id/guidelineInfoIconRight"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toTopOf="@+id/textLabela8"
-      app:srcCompat="@drawable/ic_action_info_dark"
-      />
-  <TextView
-      android:id="@+id/textLabela10"
-      android:layout_width="0dp"
-      android:layout_height="wrap_content"
-      android:layout_marginEnd="4dp"
-      android:layout_marginStart="4dp"
       android:layout_marginTop="4dp"
       android:fontFamily="monospace"
       android:gravity="center"
-      android:text="Thickness dependency:"
+      android:text="Spawned size"
       app:layout_constraintEnd_toStartOf="@+id/guidelineLabelTextRight"
       app:layout_constraintHorizontal_bias="0.0"
       app:layout_constraintStart_toStartOf="@+id/guidelineInfoIconRight"
-      app:layout_constraintTop_toBottomOf="@id/textLabela7"
+      app:layout_constraintTop_toBottomOf="@id/textLabela8"
       />
   <SeekBar
       android:id="@+id/contenta9"
@@ -490,14 +407,13 @@
       android:layout_marginStart="4dp"
       android:max="200"
       android:progress="100"
-      app:layout_constraintBottom_toBottomOf="@+id/textLabela8"
+      app:layout_constraintBottom_toBottomOf="@+id/textLabela9"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintHorizontal_bias="0.0"
       app:layout_constraintStart_toStartOf="@+id/guidelineLabelTextRight"
-      app:layout_constraintTop_toTopOf="@+id/textLabela8"
+      app:layout_constraintTop_toTopOf="@+id/textLabela9"
       app:layout_constraintVertical_bias="0.588"
       style="@style/Widget.AppCompat.SeekBar"
       />
-
 
 </android.support.constraint.ConstraintLayout>
