@@ -1,18 +1,20 @@
 package com.android.szparag.animateddropletwidget
 
 import android.content.Context
+import android.content.res.TypedArray
 import android.graphics.drawable.Drawable
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
 import android.support.annotation.RequiresApi
+import android.support.annotation.StyleableRes
 import android.view.View
+import android.view.ViewGroup.LayoutParams
 import android.view.animation.Animation
 import android.view.animation.Animation.AnimationListener
 import android.view.animation.AnimationSet
 import android.widget.ImageView
 import com.android.szparag.animateddropletwidget.AnimatedDropletWidget.WidgetInterpolator
 import com.android.szparag.animateddropletwidget.AnimatedDropletWidget.WidgetPreset
-import com.android.szparag.animateddropletwidget.AnimatedDropletWidget.WidgetPreset.NONE
 import java.util.Random
 
 typealias Widget = View
@@ -112,4 +114,31 @@ fun WidgetInterpolator.fromInt(ordinal: Int, default: WidgetInterpolator = Widge
       .filter { it.ordinal == ordinal }
       .forEach { return it }
   return default
+}
+
+fun TypedArray.getInt(@StyleableRes src: Int, defaultVal: Int)
+    = getInt(src, defaultVal)
+//    .also { Log.d("AnimatedDropletWidget", getType(src)) }
+
+fun Int.toResourceEntryName(context: Context) = context.resources.getResourceEntryName(this) ?: "null"
+
+fun View.setSize(width: Int, height: Int) =
+    this.layoutParams
+        ?.apply {
+          this.width = width
+          this.height = height
+          this@setSize.layoutParams = this
+        }
+        ?: setSizeSafe(width, height)
+
+fun View.setSizeSafe(width: Int, height: Int) {
+  this.layoutParams = LayoutParams(width, height)
+}
+
+fun View.center(containerWidth: Int, containerHeight: Int) {
+  this.layoutParams?.let {
+    x = (containerWidth - it.width) / 2f
+    y = (containerHeight - it.height) / 2f
+  }
+      ?: throw RuntimeException()
 }

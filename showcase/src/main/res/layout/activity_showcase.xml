@@ -8,15 +8,30 @@
     tools:context="com.android.szparag.animateddropletwidgetshowcase.ShowcaseActivity"
     >
 
-  <android.support.constraint.Guideline
-      android:id="@+id/guideline"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:orientation="horizontal"
-      app:layout_constraintGuide_percent="0.6"
+  <com.android.szparag.animateddropletwidget.AnimatedDropletWidget
+      android:layout_width="300dp"
+      android:layout_height="300dp"
+      android:layout_marginBottom="8dp"
+      android:layout_marginEnd="8dp"
+      android:layout_marginStart="8dp"
+      android:layout_marginTop="8dp"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toTopOf="parent"
+      app:drawable_alpha="90"
+      app:drawable_size="50"
       />
+  
+  <!--<android.support.constraint.Guideline-->
+      <!--android:id="@+id/guideline"-->
+      <!--android:layout_width="wrap_content"-->
+      <!--android:layout_height="wrap_content"-->
+      <!--android:orientation="horizontal"-->
+      <!--app:layout_constraintGuide_percent="0.6"-->
+      <!--/>-->
 
-  <include
-      layout="@layout/view_showcase_settings"/>
+  <!--<include-->
+      <!--layout="@layout/view_showcase_settings"/>-->
 
 </android.support.constraint.ConstraintLayout>
