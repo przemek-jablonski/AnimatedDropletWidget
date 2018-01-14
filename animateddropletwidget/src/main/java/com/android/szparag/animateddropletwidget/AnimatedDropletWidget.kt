@@ -262,9 +262,9 @@ open class AnimatedDropletWidget : FrameLayout {
   @CallSuper protected fun onLayoutFirstMeasurementApplied() {
     Log.d("AnimatedDropletWidget", "onLayoutFirstMeasurementApplied")
 
-    createCircularDropletBackgroundLayers(layerCount = 2)
-
     createCircularDropletsLayers(layerCount = 6)
+    createCircularDropletBackgroundLayers(layerCount = 0)
+
 
 //    oneShotDropletView = createCircularDropletView(BASE_OVAL_STROKE_THICKNESS, android.R.color.holo_purple)
 //        .apply {
@@ -298,30 +298,30 @@ open class AnimatedDropletWidget : FrameLayout {
   @SuppressLint("LogConditional")
   private fun createCircularDropletBackgroundLayers(layerCount: Int) {
     Log.d("AnimatedDropletWidget", "createCircularDropletBackgroundLayers, layerCount: $layerCount")
-    (0 until layerCount).mapTo(circularDropletBackgroundLayers) { layerIndex ->
-      createCircularBackgroundView(android.R.color.holo_red_dark)
-    }
-    circularDropletBackgroundView1 = createCircularBackgroundView(android.R.color.holo_red_dark)
-    circularDropletBackgroundView1.hide()
-    addView(circularDropletBackgroundView1)
-    animateCircularBackground(
-        targetView = circularDropletBackgroundView1,
-        startTime = 0L,
-        duration = BASE_ANIMATION_BACKGROUND_LENGTH_MILLIS,
-        repeatDelay = BASE_ANIMATION_BACKGROUND_REPEAT_DELAY_MILLIS,
-        pathRandomFactor = 0.002f
-    )
+//    (0 until layerCount).mapTo(circularDropletBackgroundLayers) { layerIndex ->
+//      createCircularBackgroundView(android.R.color.holo_red_dark)
+//    }
+//    circularDropletBackgroundView1 = createCircularBackgroundView(android.R.color.holo_red_dark)
+//    circularDropletBackgroundView1.hide()
+//    addView(circularDropletBackgroundView1)
+//    animateCircularBackground(
+//        targetView = circularDropletBackgroundView1,
+//        startTime = 0L,
+//        duration = BASE_ANIMATION_BACKGROUND_LENGTH_MILLIS,
+//        repeatDelay = BASE_ANIMATION_BACKGROUND_REPEAT_DELAY_MILLIS,
+//        pathRandomFactor = 0.002f
+//    )
 
-    circularDropletBackgroundView2 = createCircularBackgroundView(android.R.color.holo_red_dark)
-    circularDropletBackgroundView2.hide()
-    addView(circularDropletBackgroundView2)
-    animateCircularBackground(
-        targetView = circularDropletBackgroundView2,
-        startTime = BASE_ANIMATION_BACKGROUND_LENGTH_MILLIS / 2,
-        duration = BASE_ANIMATION_BACKGROUND_LENGTH_MILLIS,
-        repeatDelay = BASE_ANIMATION_BACKGROUND_REPEAT_DELAY_MILLIS,
-        pathRandomFactor = 0.01f
-    )
+//    circularDropletBackgroundView2 = createCircularBackgroundView(android.R.color.holo_red_dark)
+//    circularDropletBackgroundView2.hide()
+//    addView(circularDropletBackgroundView2)
+//    animateCircularBackground(
+//        targetView = circularDropletBackgroundView2,
+//        startTime = BASE_ANIMATION_BACKGROUND_LENGTH_MILLIS / 2,
+//        duration = BASE_ANIMATION_BACKGROUND_LENGTH_MILLIS,
+//        repeatDelay = BASE_ANIMATION_BACKGROUND_REPEAT_DELAY_MILLIS,
+//        pathRandomFactor = 0.01f
+//    )
   }
 
 
@@ -402,7 +402,7 @@ open class AnimatedDropletWidget : FrameLayout {
               repeatDelay = repeatDelay,
               xyStart = 0f,
               xyEnd = 1f,
-              interpolator = PathInterpolator(generateDropletBackgroundPath(random, pathRandomFactor)),
+              interpolator = FastOutLinearInInterpolator(),
               timeCutoff = 1.0f
           ))
           set.addAnimation(createFadeoutAnimation(
@@ -475,7 +475,13 @@ open class AnimatedDropletWidget : FrameLayout {
         animation.repeatCount = if (oneShot) 0 else Animation.INFINITE
         animation.repeatMode = Animation.RESTART
         animation.interpolator = CutoffInterpolator(sourceInterpolator = interpolator, cutoff = timeCutoff)
-        animation.setListenerBy(onRepeat = { animation.startOffset = repeatDelay })
+        animation.setListenerBy(
+            onStart = { Log.v("AnimatedDropletWidget", "createScalingAnimation.onStart") },
+            onEnd = { Log.v("AnimatedDropletWidget", "createScalingAnimation.onEnd") },
+            onRepeat = {
+              Log.v("AnimatedDropletWidget", "createScalingAnimation.onRepeat")
+              animation.startOffset = repeatDelay
+            })
       }
 
 
@@ -495,7 +501,13 @@ open class AnimatedDropletWidget : FrameLayout {
             animation.fillAfter = true
             animation.fillBefore = false
             animation.interpolator = CutoffInterpolator(sourceInterpolator = interpolator, cutoff = timeCutoff)
-            animation.setListenerBy(onRepeat = { animation.startOffset = repeatDelay })
+            animation.setListenerBy(
+                onStart = { Log.v("AnimatedDropletWidget", "createScalingAnimation.onStart") },
+                onEnd = { Log.v("AnimatedDropletWidget", "createScalingAnimation.onEnd") },
+                onRepeat = {
+                  Log.v("AnimatedDropletWidget", "createScalingAnimation.onRepeat")
+                  animation.startOffset = repeatDelay
+                })
           }
   //</editor-fold>
 
@@ -537,7 +549,7 @@ open class AnimatedDropletWidget : FrameLayout {
   private fun addViews(children: List<View>, childApply: (View, Int) -> (Unit) = { _, _ -> }) {
 //    Log.d("AnimatedDropletWidget", "addViews, children.count: ${children.size}, children: ${children.map { it.asString() }}, index: $index")
     for (i in children.size - 1 downTo 0) {
-      children[i].apply { childApply.invoke(this, i); addView(this) }
+      children[i].apply { addView(this); childApply.invoke(this, i);  }
     }
   }
 

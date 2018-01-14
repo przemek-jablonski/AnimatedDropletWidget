@@ -8,6 +8,7 @@ import android.os.Build.VERSION_CODES
 import android.support.annotation.RequiresApi
 import android.support.annotation.StyleableRes
 import android.view.View
+import android.view.View.*
 import android.view.ViewGroup.LayoutParams
 import android.view.animation.Animation
 import android.view.animation.Animation.AnimationListener
@@ -46,11 +47,11 @@ fun Float.randomVariation(random: Random, factor: Float) =
 //    random.nextLong((this - this * factor).toLong(), (this + this * factor).toLong())
 
 fun Widget.hide() {
-  if (visibility != android.view.View.GONE) this.visibility = android.view.View.GONE
+  if (visibility != GONE) this.visibility = GONE
 }
 
 fun Widget.show() {
-  if (visibility != android.view.View.VISIBLE) visibility = android.view.View.VISIBLE
+  if (visibility != VISIBLE) visibility = VISIBLE
 }
 
 
