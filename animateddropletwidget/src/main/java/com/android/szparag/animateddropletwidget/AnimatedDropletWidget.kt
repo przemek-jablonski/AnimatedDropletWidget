@@ -263,7 +263,7 @@ open class AnimatedDropletWidget : FrameLayout {
     Log.d("AnimatedDropletWidget", "onLayoutFirstMeasurementApplied")
 
     createCircularDropletsLayers(layerCount = 6)
-    createCircularDropletBackgroundLayers(layerCount = 0)
+    createCircularDropletBackgroundLayers(layerCount = 3)
 
 
 //    oneShotDropletView = createCircularDropletView(BASE_OVAL_STROKE_THICKNESS, android.R.color.holo_purple)
@@ -298,9 +298,19 @@ open class AnimatedDropletWidget : FrameLayout {
   @SuppressLint("LogConditional")
   private fun createCircularDropletBackgroundLayers(layerCount: Int) {
     Log.d("AnimatedDropletWidget", "createCircularDropletBackgroundLayers, layerCount: $layerCount")
-//    (0 until layerCount).mapTo(circularDropletBackgroundLayers) { layerIndex ->
-//      createCircularBackgroundView(android.R.color.holo_red_dark)
-//    }
+    (0 until layerCount).mapTo(circularDropletBackgroundLayers) { layerIndex ->
+      createCircularBackgroundView(android.R.color.holo_red_dark)
+    }
+
+    addViews(circularDropletBackgroundLayers, {child, index ->
+          animateCircularBackground(
+        targetView = child,
+        startTime = 0L,
+        duration = BASE_ANIMATION_BACKGROUND_LENGTH_MILLIS,
+        repeatDelay = BASE_ANIMATION_BACKGROUND_REPEAT_DELAY_MILLIS,
+        pathRandomFactor = 0.002f
+    )
+    })
 //    circularDropletBackgroundView1 = createCircularBackgroundView(android.R.color.holo_red_dark)
 //    circularDropletBackgroundView1.hide()
 //    addView(circularDropletBackgroundView1)
