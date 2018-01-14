@@ -19,8 +19,8 @@
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintTop_toTopOf="parent"
-      app:drawable_alpha="90"
-      app:drawable_size="50"
+      app:drawable_alpha="50"
+      app:drawable_size="75"
       />
   
   <!--<android.support.constraint.Guideline-->

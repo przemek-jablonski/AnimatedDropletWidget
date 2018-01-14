@@ -18,10 +18,7 @@ import android.support.annotation.RequiresApi
 import android.support.v4.view.animation.FastOutLinearInInterpolator
 import android.util.AttributeSet
 import android.util.Log
-import android.view.Gravity
-import android.view.Gravity.CENTER
 import android.view.View
-import android.view.ViewGroup
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.animation.AccelerateInterpolator
 import android.view.animation.AlphaAnimation
@@ -275,10 +272,10 @@ open class AnimatedDropletWidget : FrameLayout {
 //          addView(this)
 //        }
 
-    drawableView = createFrontDrawableView(drawableRes = drawableSrc, alpha = drawableAlpha, size = drawableSize)
-
-    //todo: this is not elegant
-    addView(drawableView)
+    if (drawableAlpha != 0 && drawableSize != 0 && drawableSrc != android.R.color.transparent) {
+      drawableView = createFrontDrawableView(drawableRes = drawableSrc, alpha = drawableAlpha, size = drawableSize)
+      addView(drawableView)
+    }
   }
 
   @SuppressLint("LogConditional")
