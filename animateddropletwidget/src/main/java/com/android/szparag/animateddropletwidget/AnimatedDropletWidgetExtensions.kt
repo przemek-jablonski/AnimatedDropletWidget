@@ -9,6 +9,7 @@ import android.support.annotation.RequiresApi
 import android.support.annotation.StyleableRes
 import android.view.View
 import android.view.View.*
+import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams
 import android.view.animation.Animation
 import android.view.animation.Animation.AnimationListener
@@ -35,7 +36,7 @@ fun Random.nextFloat(min: Float, max: Float) =
 //    nextLong() * (max - min) + min
 
 fun Float.randomVariation(random: Random, factor: Float) =
-    random.nextFloat(this - this * factor, this + this * factor)
+    if (factor != 0f) random.nextFloat(this - this * factor, this + this * factor) else this
 //
 //fun Double.randomVariation(random: Random, factor: Float) =
 //    random.nextDouble(this - this * factor, this + this * factor)
@@ -143,3 +144,5 @@ fun View.center(containerWidth: Int, containerHeight: Int) {
   }
       ?: throw RuntimeException()
 }
+
+fun ViewGroup.getChildren() = (0 until childCount).map { childIndex -> getChildAt(childIndex) }
