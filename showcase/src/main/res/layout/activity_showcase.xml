@@ -21,7 +21,8 @@
       app:layout_constraintTop_toTopOf="parent"
       app:drawable_alpha="0"
       app:drawable_size="75"
-      app:background_layers_count="7"
+      app:background_layers_count="10"
+      app:background_colour="@android:color/holo_orange_dark"
       />
   
   <!--<android.support.constraint.Guideline-->

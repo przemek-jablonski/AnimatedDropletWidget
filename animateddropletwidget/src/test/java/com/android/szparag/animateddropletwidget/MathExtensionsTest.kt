@@ -9,6 +9,7 @@ import java.util.Random
 import kotlin.math.roundToLong
 
 private const val MATH_TESTS_REPEAT_COUNT = 10000
+private const val MATH_EQUALITY_ERROR_THRESHOLD = 0.001f
 
 class MathExtensionsTest {
 
@@ -429,7 +430,7 @@ class MathExtensionsTest {
     var factor: Float
     repeat {
       factor = random.nextFloat(0.001f, 0.999f)
-      assertThat(lerp(a, b, factor)).isEqualTo(a * (1 - factor), within(0.001f))
+      assertThat(lerp(a, b, factor)).isEqualTo(a * (1 - factor), within(MATH_EQUALITY_ERROR_THRESHOLD))
     }
   }
 
@@ -439,7 +440,7 @@ class MathExtensionsTest {
     var factor: Float
     repeat {
       factor = random.nextFloat(0.001f, 0.999f)
-      assertThat(lerp(a, b, factor)).isEqualTo((factor - 0.5f) * 10, within(0.001f))
+      assertThat(lerp(a, b, factor)).isEqualTo((factor - 0.5f) * 10, within(MATH_EQUALITY_ERROR_THRESHOLD))
     }
   }
 
@@ -452,7 +453,17 @@ class MathExtensionsTest {
       a = random.nextFloat(50f, 100f)
       b = random.nextFloat(0f, 50f)
       factor = random.nextFloat(0.001f, 0.999f)
-      assertThat(lerp(a, b, factor)).isEqualTo(lerp(b, a, 1 - factor), within(0.001f))
+      assertThat(lerp(a, b, factor)).isEqualTo(lerp(b, a, 1 - factor), within(MATH_EQUALITY_ERROR_THRESHOLD))
+    }
+  }
+
+  @Test fun `lerp() (Float) given positive range and factor over 1 should go out of bounds`() {
+    val a = 0f
+    val b = 10f
+    var factor: Float
+    repeat {
+      factor = random.nextFloat(1f, 10f)
+      assertThat(lerp(a, b, factor)).isEqualTo(b * factor)
     }
   }
 
@@ -472,10 +483,37 @@ class MathExtensionsTest {
 
 
   //<editor-fold desc="inverseLerp()">
-  @Test fun `inverseLerp`() {
+  @Test fun `inverseLerp() given actual value in bounds should return factor accordingly`() {
+    val a = 0
+    val b = 10
+    var actual: Float
+    repeat { 
+      actual = random.nextFloat(0f, 10f) 
+      assertThat(inverseLerp(a, b, actual)).isEqualTo(actual / b.toFloat(), within(MATH_EQUALITY_ERROR_THRESHOLD))
+    }
+  }
 
+  @Test fun `inverseLerp() given actual value out of bounds (positive) should return factor ceiling (1)`() {
+    val a = 0
+    val b = 10
+    var actual: Float
+    repeat {
+      actual = random.nextFloat(10f, 20f)
+      assertThat(inverseLerp(a, b, actual)).isEqualTo(1f)
+    }
+  }
+
+  @Test fun `inverseLerp() given actual value out of bounds (negative) should return factor floor (0)`() {
+    val a = 0
+    val b = 10
+    var actual: Float
+    repeat {
+      actual = random.nextFloat(-10f, 0f)
+      assertThat(inverseLerp(a, b, actual)).isEqualTo(0f)
+    }
   }
   //</editor-fold>
+
 
   private fun repeat(count: Int = MATH_TESTS_REPEAT_COUNT, action: () -> Unit) {
     for (i in 0 until count) action.invoke()
