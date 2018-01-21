@@ -1,6 +1,15 @@
-package com.android.szparag.animateddropletwidget
+package com.android.szparag.animateddropletwidgetshowcase
 
-import junit.framework.TestCase.assertEquals
+import com.android.szparag.animateddropletwidget.clamp
+import com.android.szparag.animateddropletwidget.inverseLerp
+import com.android.szparag.animateddropletwidget.lerp
+import com.android.szparag.animateddropletwidget.lerpLong
+import com.android.szparag.animateddropletwidget.nextDouble
+import com.android.szparag.animateddropletwidget.nextFloat
+import com.android.szparag.animateddropletwidget.nextInt
+import com.android.szparag.animateddropletwidget.nextLong
+import com.android.szparag.animateddropletwidget.randomVariation
+import junit.framework.TestCase
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.within
 import org.junit.Before
@@ -154,7 +163,7 @@ class MathExtensionsTest {
     val input = 133.7f
     val factor = 0f
     repeat {
-      assertEquals(input, input.randomVariation(random, factor))
+      TestCase.assertEquals(input, input.randomVariation(random, factor))
     }
   }
 
@@ -207,7 +216,7 @@ class MathExtensionsTest {
     val input = 133.7
     val factor = 0f
     repeat {
-      assertEquals(input, input.randomVariation(random, factor))
+      TestCase.assertEquals(input, input.randomVariation(random, factor))
     }
   }
 
@@ -260,7 +269,7 @@ class MathExtensionsTest {
     val input = 1337
     val factor = 0f
     repeat {
-      assertEquals(input, input.randomVariation(random, factor))
+      TestCase.assertEquals(input, input.randomVariation(random, factor))
     }
   }
 
@@ -312,7 +321,7 @@ class MathExtensionsTest {
     val input = 1337L
     val factor = 0f
     repeat {
-      assertEquals(input, input.randomVariation(random, factor))
+      TestCase.assertEquals(input, input.randomVariation(random, factor))
     }
   }
 
@@ -487,8 +496,8 @@ class MathExtensionsTest {
     val a = 0
     val b = 10
     var actual: Float
-    repeat { 
-      actual = random.nextFloat(0f, 10f) 
+    repeat {
+      actual = random.nextFloat(0f, 10f)
       assertThat(inverseLerp(a, b, actual)).isEqualTo(actual / b.toFloat(), within(MATH_EQUALITY_ERROR_THRESHOLD))
     }
   }

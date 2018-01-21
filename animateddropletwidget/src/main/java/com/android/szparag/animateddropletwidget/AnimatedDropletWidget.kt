@@ -4,6 +4,7 @@ import android.R.color
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.TypedArray
+import android.graphics.Color
 import android.graphics.Paint.Style.FILL
 import android.graphics.Paint.Style.STROKE
 import android.graphics.Path
@@ -12,9 +13,11 @@ import android.graphics.drawable.shapes.OvalShape
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
 import android.support.annotation.CallSuper
+import android.support.annotation.ColorInt
 import android.support.annotation.ColorRes
 import android.support.annotation.DrawableRes
 import android.support.annotation.RequiresApi
+import android.support.v4.graphics.ColorUtils
 import android.support.v4.view.animation.FastOutLinearInInterpolator
 import android.util.AttributeSet
 import android.util.Log
@@ -91,6 +94,12 @@ private const val BASE_OVAL_STROKE_THICKNESS = 50f
 private const val ANIMATION_RANDOM_START_TIME_BOUND_MILLIS = BASE_ANIMATION_LENGTH_MILLIS * 2
 private const val ANIMATION_RANDOM_REPEAT_DELAY_BOUND_MILLIS = ANIMATION_RANDOM_START_TIME_BOUND_MILLIS * 2.50
 //</editor-fold>
+
+private const val TAG_INDEX = 1337
+private const val TAG_BACKGROUND_VAL = "BACKGROUND"
+private const val TAG_DROPLET_VAL = "DROPLET"
+private const val TAG_ONESHOT_VAL = "ONESHOT"
+private const val TAG_DRAWABLE_VAL = "DRAWABLE"
 
 @SuppressLint("LogNotTimber") //todo: temporary, remove that
 open class AnimatedDropletWidget : FrameLayout {
@@ -262,8 +271,18 @@ open class AnimatedDropletWidget : FrameLayout {
     Log.d("AnimatedDropletWidget", "onLayoutFirstMeasurementApplied")
 
     createCircularDropletsLayers(layerCount = 1)
-    createCircularDropletBackgroundLayers(backgroundLayersCount, backgroundColour, backgroundMaxDuration, globalRandomInfluence)
-    createFrontDrawable(drawableAlpha, drawableSize, drawableSrc)
+    createCircularDropletBackgroundLayers(
+        layerCount = backgroundLayersCount,
+        colorRes = backgroundColour,
+        colourDistribution = backgroundColourDistribution,
+        duration = backgroundMaxDuration,
+        randomFactor = globalRandomInfluence
+    )
+    createFrontDrawable(
+        alpha = drawableAlpha,
+        size = drawableSize,
+        src = drawableSrc
+    )
 
 //    oneShotDropletView = createCircularDropletView(BASE_OVAL_STROKE_THICKNESS, android.R.color.holo_purple)
 //        .apply {
@@ -293,10 +312,14 @@ open class AnimatedDropletWidget : FrameLayout {
   }
 
   @SuppressLint("LogConditional")
-  private fun createCircularDropletBackgroundLayers(layerCount: Int, @ColorRes colorRes: Int, duration: Millis, randomFactor: Float) {
+  private fun createCircularDropletBackgroundLayers(layerCount: Int, @ColorRes colorRes: Int, colourDistribution: Float, duration: Millis,
+      randomFactor: Float) {
     Log.d("AnimatedDropletWidget", "createCircularDropletBackgroundLayers, layerCount: $layerCount")
     (0 until layerCount).mapTo(circularDropletBackgroundLayers) {
-      createCircularBackgroundView(colorRes, -50) //todo: colours distribution
+      createCircularBackgroundView(
+          colourId = ColorUtils.blendARGB(resources.getColor(colorRes), Color.TRANSPARENT, it / layerCount.toFloat()),
+          alpha = 100
+      ) //todo: colours distribution
     }
 
     addViews(circularDropletBackgroundLayers, { child, index ->
@@ -304,18 +327,17 @@ open class AnimatedDropletWidget : FrameLayout {
           targetView = child,
           startTime = lerpLong(0, duration, index / layerCount.toFloat().randomVariation(random, randomFactor)), //todo apply index
           duration = duration, //todo apply index
-          repeatDelay = duration / 10,
-          pathRandomFactor = randomFactor
+          randomFactor = randomFactor
       )
     })
   }
 
   @SuppressLint("LogConditional")
-  private fun createFrontDrawable(drawableAlpha: Int, drawableSize: Int, @DrawableRes drawableSrc: Int) {
-    Log.d("AnimatedDropletWidget", "createFrontDrawable, drawableAlpha: $drawableAlpha, drawableSize: $drawableSize, " +
-        "drawableSrc: $drawableSrc")
-    if (drawableAlpha != 0 && drawableSize != 0 && drawableSrc != android.R.color.transparent) {
-      drawableView = createFrontDrawableView(drawableRes = drawableSrc, alpha = drawableAlpha, size = drawableSize)
+  private fun createFrontDrawable(alpha: Percentage, size: Int, @DrawableRes src: Int) {
+    Log.d("AnimatedDropletWidget", "createFrontDrawable, alpha: $alpha, size: $size, " +
+        "src: $src")
+    if (alpha != 0 && size != 0 && src != android.R.color.transparent) {
+      drawableView = createFrontDrawableView(drawableRes = src, alpha = alpha, size = size)
       addView(drawableView)
     }
   }
@@ -327,23 +349,25 @@ open class AnimatedDropletWidget : FrameLayout {
   private fun createCircularDropletView(thickness: Float, @ColorRes colourId: ResourceId)
       = createImageViewWithDrawable(context, createCircularDropletDrawable(thickness, colourId))
       .also {
+//        it.setTag(TAG_INDEX, TAG_DROPLET_VAL)
         Log.d("AnimatedDropletWidget", "createCircularDropletView, thickness: $thickness, colourId: ${colourId
             .toResourceEntryName(context)}, view: ${it.asString()}")
       }
 
   @SuppressLint("LogConditional")
-  private fun createCircularBackgroundView(@ColorRes colourId: ResourceId, alpha: Percentage = 100)
+  private fun createCircularBackgroundView(@ColorInt colourId: ResourceId, alpha: Percentage = 100)
       = createImageViewWithDrawable(context, createCircularBackgroundDrawable(colourId))
       .also {
-        this.alpha = -0.5f
-        Log.d("AnimatedDropletWidget", "createCircularBackgroundView, colourId: ${colourId.toResourceEntryName(context)}, " +
-            "view: ${it.asString()}")
+//        this.alpha = (alpha/100f).clamp(1f, 0f)
+        Log.d("AnimatedDropletWidget", "createCircularBackgroundView, alpha: $alpha, " +
+            "colourId: $colourId, view: ${it.asString()}")
       }
 
   @SuppressLint("LogConditional")
   private fun createFrontDrawableView(@DrawableRes drawableRes: ResourceId, alpha: Percentage, size: Percentage)
       = createImageViewWithDrawable(context, drawableRes.let { resources.getDrawable(drawableRes) })
       .apply {
+//        this.setTag(TAG_INDEX, TAG_DRAWABLE_VAL)
         this.alpha = alpha / 100f
         this.setSize(
             (this@AnimatedDropletWidget.layoutParams.width * size / 100f).toInt(),
@@ -371,12 +395,12 @@ open class AnimatedDropletWidget : FrameLayout {
       }
 
   @SuppressLint("LogConditional")
-  private fun createCircularBackgroundDrawable(@ColorRes colourId: ResourceId) =
+  private fun createCircularBackgroundDrawable(@ColorInt colourId: ResourceId) =
       ShapeDrawable(OvalShape()).apply {
         this.intrinsicHeight = this@AnimatedDropletWidget.height
         this.intrinsicWidth = this@AnimatedDropletWidget.width
         this.paint.style = FILL
-        this.paint.color = resources.getColor(colourId)
+        this.paint.color = colourId
       }.also {
         Log.d("AnimatedDropletWidget", "createCircularBackgroundDrawable, drawable: ${it.asString()}")
       }
@@ -386,9 +410,9 @@ open class AnimatedDropletWidget : FrameLayout {
   //<editor-fold desc="Animating views">
   @SuppressLint("LogConditional")
   //todo: add endsize to this
-  private fun animateCircularBackground(targetView: View, startTime: Millis, duration: Millis, repeatDelay: Millis,
-      pathRandomFactor: Float) {
+  private fun animateCircularBackground(targetView: View, startTime: Millis, duration: Millis, randomFactor: Float) {
     Log.d("AnimatedDropletWidget", "animateCircularBackground, targetView: ${targetView.asString()}")
+    val repeatDelay = (duration / 10)
     targetView.show()
     AnimationSet(false)
         .also { set ->
@@ -551,6 +575,9 @@ open class AnimatedDropletWidget : FrameLayout {
         childApply.invoke(child, index)
       }
     Log.d("AnimatedDropletWidget", "addViews, this.views: ${getChildren().map { it.asString() }}")
+    getChildren().forEachIndexed { index, view ->
+      Log.v("AnimatedDropletWidget", "[$index]\n${view.complexString}")
+    }
   }
 
   private fun createInterpolator(randomFactor: Float) =
