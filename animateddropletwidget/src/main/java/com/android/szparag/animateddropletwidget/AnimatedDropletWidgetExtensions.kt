@@ -75,7 +75,7 @@ fun inverseLerp(first: Int, second: Int, actual: Float) =
 
 
 fun Widget.hide() {
-  if (visibility != GONE) this.visibility = GONE
+  if (visibility != GONE) visibility = GONE
 }
 
 fun Widget.show() {
@@ -158,6 +158,7 @@ fun ViewGroup.getChildren() = (0 until childCount).map { childIndex -> getChildA
 val View.complexString
   get() = StringBuilder(2048).append(
       "${asShortString()}\n" +
+          "\t${toString()}\n" +
           "\tid: $id, tag: $tag\n" +
           "\tvisibility: ${visibilityAsString()}, alpha: ${this.alpha}\n" +
           "\tpaddings (top, bot, left, right): ($paddingTop, $paddingBottom, $paddingLeft, $paddingRight)\n" +
