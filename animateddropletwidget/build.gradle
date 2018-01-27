@@ -54,6 +54,12 @@ android {
 dependencies {
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
   implementation 'com.android.support:appcompat-v7:27.0.2'
+
+  implementation group: 'io.reactivex.rxjava2', name: 'rxandroid', version: '2.0.1'
+  implementation group: 'io.reactivex.rxjava2', name: 'rxjava', version: '2.1.9'
+  implementation group: 'io.reactivex.rxjava2', name: 'rxkotlin', version: '2.2.0'
+
+
 }
 repositories {
   mavenCentral()
