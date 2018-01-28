@@ -26,6 +26,8 @@ import kotlin.math.roundToLong
 typealias Widget = View
 typealias Width = Int
 typealias Height = Int
+typealias Dp = Int
+typealias Px = Int
 
 private val animationListenerCallbackStub: (Animation?) -> Unit = {}
 
@@ -186,3 +188,6 @@ val Drawable.padding: Rect
 
 val Drawable.complexString
   get () = "(width, height): ($intrinsicWidth, $intrinsicHeight), bounds: ${this.bounds}"
+
+fun Dp.toPx(context: Context) =
+  (this * context.resources.displayMetrics.density).toInt()
