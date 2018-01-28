@@ -14,10 +14,8 @@ import android.view.animation.Interpolator
  * Uses sourceInterpolator Interpolator to transform input data further.
  */
 class CutoffInterpolator(
-    private val sourceInterpolator: Interpolator? = null,
-    private val inputRangeMin: Float = 0f,
-    private val inputRangeMax: Float = 1f,
-    cutoff: Float) : Interpolator {
+  private val sourceInterpolator: Interpolator? = null, private val inputRangeMin: Float = 0f, private val inputRangeMax: Float = 1f,
+  cutoff: Float) : Interpolator {
 
   private val lerpLimit = (inputRangeMax - inputRangeMin) + (inputRangeMax - cutoff)
 

@@ -12,35 +12,27 @@ import android.graphics.drawable.ShapeDrawable
 import android.graphics.drawable.shapes.OvalShape
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
-import android.support.annotation.CallSuper
-import android.support.annotation.ColorInt
-import android.support.annotation.ColorRes
-import android.support.annotation.DrawableRes
-import android.support.annotation.RequiresApi
+import android.support.annotation.*
 import android.support.v4.graphics.ColorUtils
 import android.support.v4.view.animation.FastOutLinearInInterpolator
 import android.util.AttributeSet
 import android.util.Log
+import android.view.Gravity
 import android.view.View
-import android.view.animation.AccelerateDecelerateInterpolator
-import android.view.animation.AccelerateInterpolator
-import android.view.animation.AlphaAnimation
-import android.view.animation.Animation
-import android.view.animation.AnimationSet
-import android.view.animation.AnticipateOvershootInterpolator
-import android.view.animation.Interpolator
-import android.view.animation.PathInterpolator
-import android.view.animation.ScaleAnimation
+import android.view.View.MeasureSpec.EXACTLY
+import android.view.View.MeasureSpec.makeMeasureSpec
+import android.view.animation.*
 import android.widget.FrameLayout
 import android.widget.ImageView
 import io.reactivex.Single
 import io.reactivex.rxkotlin.subscribeBy
-import java.util.Random
+import java.util.*
 import java.util.concurrent.TimeUnit
 
 typealias Millis = Long
 typealias ResourceId = Int
 typealias Percentage = Int
+typealias Factor = Float
 
 /**
  * Created by Przemyslaw Jablonski (github.com/sharaquss, pszemek.me) on 15/11/2017.
@@ -69,7 +61,7 @@ private const val ATTRS_DROPLETS_MAX_DURATION_DISTRIBUTION = 1.00F
 private const val ATTRS_DROPLETS_SPAWNSIZE = 0
 private const val ATTRS_DROPLETS_ENDSIZE_MAX = 100
 private const val ATTRS_DROPLETS_ENDSIZE_MIN =
-    ATTRS_DRAWABLE_SIZE + (ATTRS_DROPLETS_ENDSIZE_MAX - ATTRS_DROPLETS_ENDSIZE_MAX) / 3 //todo: this 3 as constant
+  ATTRS_DRAWABLE_SIZE + (ATTRS_DROPLETS_ENDSIZE_MAX - ATTRS_DROPLETS_ENDSIZE_MAX) / 3 //todo: this 3 as constant
 private const val ATTRS_DROPLETS_FADEOUT = 1.00F
 private const val ATTRS_DROPLETS_THICKNESS = 1.00F
 private const val ATTRS_DROPLETS_THICKNESS_DISTRIBUTION = 1.00F
@@ -91,11 +83,13 @@ private const val ATTRS_ONESHOT_COLOUR = ATTRS_GLOBAL_COLOUR
 private const val BASE_ANIMATION_LENGTH_MILLIS = 5000L
 private const val BASE_ANIMATION_LENGTH_MIN_MILLIS = (BASE_ANIMATION_LENGTH_MILLIS * 0.66f).toLong()
 private const val BASE_ANIMATION_REPEAT_DELAY_MILLIS = BASE_ANIMATION_LENGTH_MILLIS / 2
-private const val BASE_ANIMATION_BACKGROUND_LENGTH_MILLIS = (BASE_ANIMATION_LENGTH_MILLIS * 2.5f).toLong()
+private const val BASE_ANIMATION_BACKGROUND_LENGTH_MILLIS =
+  (BASE_ANIMATION_LENGTH_MILLIS * 2.5f).toLong()
 private const val BASE_ANIMATION_BACKGROUND_REPEAT_DELAY_MILLIS = BASE_ANIMATION_LENGTH_MILLIS / 35
 private const val BASE_OVAL_STROKE_THICKNESS = 50f
 private const val ANIMATION_RANDOM_START_TIME_BOUND_MILLIS = BASE_ANIMATION_LENGTH_MILLIS * 2
-private const val ANIMATION_RANDOM_REPEAT_DELAY_BOUND_MILLIS = ANIMATION_RANDOM_START_TIME_BOUND_MILLIS * 2.50
+private const val ANIMATION_RANDOM_REPEAT_DELAY_BOUND_MILLIS =
+  ANIMATION_RANDOM_START_TIME_BOUND_MILLIS * 2.50
 //</editor-fold>
 
 private const val TAG_INDEX = 1337
@@ -112,11 +106,12 @@ open class AnimatedDropletWidget : FrameLayout {
    * View properties.
    * Populated with constants with default xml attributes at creation time.
    * Some of those can be overwritten if user chooses to do so in xml
-   * @see parseCustomAttributes
+   * @see fetchCustomAttributes
    */
   private var preset = WidgetPreset.NONE
 
-  @DrawableRes private var drawableSrc = ATTRS_DRAWABLE
+  @DrawableRes
+  private var drawableSrc = ATTRS_DRAWABLE
   private var drawableSize = ATTRS_DRAWABLE_SIZE
   private var drawableAlpha = ATTRS_DRAWABLE_ALPHA
 
@@ -152,7 +147,7 @@ open class AnimatedDropletWidget : FrameLayout {
   //</editor-fold>
 
   //todo: unify - there are vars, lateinit vars and vals here
-  private lateinit var drawableView: ImageView
+  private var drawableView: ImageView? = null
   private val circularBackgroundLayers = arrayListOf<View>()
   private val circularDropletViewLayers = arrayListOf<View>()
 
@@ -170,20 +165,24 @@ open class AnimatedDropletWidget : FrameLayout {
   enum class WidgetPreset { NONE, DROPLETS, FLOW, RADAR, IRREGULAR }
   enum class WidgetInterpolator { PREDEFINED, ACCELERATE, DECELERATE, ACCELERATE_DECELERATE, BOUNCE, OVERSHOOT }
 
-
   constructor(context: Context) : this(context, null)
   constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
-  constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
+  constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
+    context, attrs, defStyleAttr
+  ) {
     Log.d("AnimatedDropletWidget", "ctor")
-    context.theme.obtainStyledAttributes(attrs, R.styleable.AnimatedDropletWidget, defStyleAttr, 0)?.let { parseCustomAttributes(it) }
-    applyCustomAtrributes()
-    setupView()
+    context.theme.obtainStyledAttributes(attrs, R.styleable.AnimatedDropletWidget, defStyleAttr, 0)
+      ?.let { fetchCustomAttributes(it) }
+    constructChildViews()
+    attachChildViews()
+//    setupView()
   }
 
   //<editor-fold desc="Parsing xml attributes (if any)">
   //todo: typedarray as input
-  @CallSuper protected fun parseCustomAttributes(attrs: TypedArray) {
-    Log.d("AnimatedDropletWidget", "parseCustomAttributes")
+  @CallSuper
+  protected fun fetchCustomAttributes(attrs: TypedArray) {
+    Log.d("AnimatedDropletWidget", "fetchCustomAttributes")
     Log.d("AnimatedDropletWidget", "viewProperties: \n ${printViewAttributes()}")
     try {
       drawableSrc = attrs.getResourceId(R.styleable.AnimatedDropletWidget_drawable_src, drawableSrc)
@@ -191,99 +190,231 @@ open class AnimatedDropletWidget : FrameLayout {
       drawableAlpha = attrs.getInt(R.styleable.AnimatedDropletWidget_drawable_alpha, drawableAlpha)
       preset.fromInt(attrs.getInt(R.styleable.AnimatedDropletWidget_preset, preset.ordinal))
       dropletCount = attrs.getInt(R.styleable.AnimatedDropletWidget_droplet_count, dropletCount)
-      backgroundLayersCount = attrs.getInt(R.styleable.AnimatedDropletWidget_background_layers_count, backgroundLayersCount)
-      oneshotLayersCount = attrs.getInt(R.styleable.AnimatedDropletWidget_oneshot_count, oneshotLayersCount)
-      globalRandomInfluence = attrs.getFloat(R.styleable.AnimatedDropletWidget_global_random_influence, globalRandomInfluence)
-      globalMaxDuration = attrs.getInt(R.styleable.AnimatedDropletWidget_global_max_duration_ms,
-          globalMaxDuration.toInt()).toLong() //todo: double casting here
-      globalColour = attrs.getResourceId(R.styleable.AnimatedDropletWidget_global_colour, globalColour)
-      globalColourDistribution = attrs.getFloat(R.styleable.AnimatedDropletWidget_global_colour_distribution, globalColourDistribution)
-      globalInterpolator.fromInt(attrs.getInt(R.styleable.AnimatedDropletWidget_global_interpolator, globalInterpolator.ordinal))
+      backgroundLayersCount = attrs.getInt(
+        R.styleable.AnimatedDropletWidget_background_layers_count, backgroundLayersCount
+      )
+      oneshotLayersCount =
+          attrs.getInt(R.styleable.AnimatedDropletWidget_oneshot_count, oneshotLayersCount)
+      globalRandomInfluence = attrs.getFloat(
+        R.styleable.AnimatedDropletWidget_global_random_influence, globalRandomInfluence
+      )
+      globalMaxDuration = attrs.getInt(
+        R.styleable.AnimatedDropletWidget_global_max_duration_ms, globalMaxDuration.toInt()
+      ).toLong() //todo: double casting here
+      globalColour =
+          attrs.getResourceId(R.styleable.AnimatedDropletWidget_global_colour, globalColour)
+      globalColourDistribution = attrs.getFloat(
+        R.styleable.AnimatedDropletWidget_global_colour_distribution, globalColourDistribution
+      )
+      globalInterpolator.fromInt(
+        attrs.getInt(
+          R.styleable.AnimatedDropletWidget_global_interpolator, globalInterpolator.ordinal
+        )
+      )
 
-      dropletsMaxDuration = attrs.getInt(R.styleable.AnimatedDropletWidget_droplets_max_duration, dropletsMaxDuration.toInt()).toLong()
-      dropletsMaxDurationDistribution = attrs.getFloat(R.styleable.AnimatedDropletWidget_droplets_max_duration,
-          dropletsMaxDurationDistribution)
-      dropletsSpawnsize = attrs.getInt(R.styleable.AnimatedDropletWidget_droplets_spawnsize, dropletsSpawnsize)
-      dropletsEndsizeMin = attrs.getInt(R.styleable.AnimatedDropletWidget_droplets_endsize_min, dropletsEndsizeMin)
-      dropletsEndsizeMax = attrs.getInt(R.styleable.AnimatedDropletWidget_droplets_endsize_max, dropletsEndsizeMax)
-      dropletsFadeout = attrs.getFloat(R.styleable.AnimatedDropletWidget_droplets_fadeout, dropletsFadeout)
-      dropletsThickness = attrs.getFloat(R.styleable.AnimatedDropletWidget_droplets_thickness, dropletsThickness)
-      dropletsThicknessDistribution = attrs.getFloat(R.styleable.AnimatedDropletWidget_droplets_thickness_distribution,
-          dropletsThicknessDistribution)
-      dropletsInterpolator.fromInt(attrs.getInt(R.styleable.AnimatedDropletWidget_droplets_interpolator, dropletsInterpolator.ordinal))
+      dropletsMaxDuration = attrs.getInt(
+        R.styleable.AnimatedDropletWidget_droplets_max_duration, dropletsMaxDuration.toInt()
+      ).toLong()
+      dropletsMaxDurationDistribution = attrs.getFloat(
+        R.styleable.AnimatedDropletWidget_droplets_max_duration, dropletsMaxDurationDistribution
+      )
+      dropletsSpawnsize =
+          attrs.getInt(R.styleable.AnimatedDropletWidget_droplets_spawnsize, dropletsSpawnsize)
+      dropletsEndsizeMin =
+          attrs.getInt(R.styleable.AnimatedDropletWidget_droplets_endsize_min, dropletsEndsizeMin)
+      dropletsEndsizeMax =
+          attrs.getInt(R.styleable.AnimatedDropletWidget_droplets_endsize_max, dropletsEndsizeMax)
+      dropletsFadeout =
+          attrs.getFloat(R.styleable.AnimatedDropletWidget_droplets_fadeout, dropletsFadeout)
+      dropletsThickness =
+          attrs.getFloat(R.styleable.AnimatedDropletWidget_droplets_thickness, dropletsThickness)
+      dropletsThicknessDistribution = attrs.getFloat(
+        R.styleable.AnimatedDropletWidget_droplets_thickness_distribution,
+        dropletsThicknessDistribution
+      )
+      dropletsInterpolator.fromInt(
+        attrs.getInt(
+          R.styleable.AnimatedDropletWidget_droplets_interpolator, dropletsInterpolator.ordinal
+        )
+      )
 
-      backgroundMaxDuration = attrs.getInt(R.styleable.AnimatedDropletWidget_background_max_duration,
-          backgroundMaxDuration.toInt()).toLong()
-      backgroundEndsizeMax = attrs.getInt(R.styleable.AnimatedDropletWidget_background_endsize_max, backgroundEndsizeMax)
-      backgroundColour = attrs.getResourceId(R.styleable.AnimatedDropletWidget_background_colour, backgroundColour)
-      backgroundColourDistribution = attrs.getFloat(R.styleable.AnimatedDropletWidget_background_colour_distibution,
-          backgroundColourDistribution)
+      backgroundMaxDuration = attrs.getInt(
+        R.styleable.AnimatedDropletWidget_background_max_duration, backgroundMaxDuration.toInt()
+      ).toLong()
+      backgroundEndsizeMax = attrs.getInt(
+        R.styleable.AnimatedDropletWidget_background_endsize_max, backgroundEndsizeMax
+      )
+      backgroundColour =
+          attrs.getResourceId(R.styleable.AnimatedDropletWidget_background_colour, backgroundColour)
+      backgroundColourDistribution = attrs.getFloat(
+        R.styleable.AnimatedDropletWidget_background_colour_distibution,
+        backgroundColourDistribution
+      )
       backgroundInterpolator.fromInt(
-          attrs.getInt(R.styleable.AnimatedDropletWidget_background_interpolator, backgroundInterpolator.ordinal))
+        attrs.getInt(
+          R.styleable.AnimatedDropletWidget_background_interpolator, backgroundInterpolator.ordinal
+        )
+      )
 
-      oneshotColour = attrs.getResourceId(R.styleable.AnimatedDropletWidget_oneshot_colour, oneshotColour)
-      oneshotInterpolator.fromInt(attrs.getInt(R.styleable.AnimatedDropletWidget_oneshot_interpolator, oneshotInterpolator.ordinal))
+      oneshotColour =
+          attrs.getResourceId(R.styleable.AnimatedDropletWidget_oneshot_colour, oneshotColour)
+      oneshotInterpolator.fromInt(
+        attrs.getInt(
+          R.styleable.AnimatedDropletWidget_oneshot_interpolator, oneshotInterpolator.ordinal
+        )
+      )
 
 
-      attrs.getInt(R.styleable.AnimatedDropletWidget_global_max_duration_ms, globalMaxDuration.toInt()).toLong()
-          .apply {
-            globalMaxDuration = this
-            backgroundMaxDuration = this
-            dropletsMaxDuration = this
-            oneshotMaxDuration = this
-          }
+      attrs.getInt(
+        R.styleable.AnimatedDropletWidget_global_max_duration_ms, globalMaxDuration.toInt()
+      ).toLong().apply {
+        globalMaxDuration = this
+        backgroundMaxDuration = this
+        dropletsMaxDuration = this
+        oneshotMaxDuration = this
+      }
 
-      attrs.getInt(R.styleable.AnimatedDropletWidget_droplets_max_duration, dropletsMaxDuration.toInt()).toLong()
-          .apply {
-            dropletsMaxDuration = this
-            oneshotMaxDuration = this
-          }
+      attrs.getInt(
+        R.styleable.AnimatedDropletWidget_droplets_max_duration, dropletsMaxDuration.toInt()
+      ).toLong().apply {
+        dropletsMaxDuration = this
+        oneshotMaxDuration = this
+      }
 
-      backgroundMaxDuration =
-          attrs.getInt(R.styleable.AnimatedDropletWidget_background_max_duration, backgroundMaxDuration.toInt()).toLong()
-
+      backgroundMaxDuration = attrs.getInt(
+        R.styleable.AnimatedDropletWidget_background_max_duration, backgroundMaxDuration.toInt()
+      ).toLong()
 
     } finally {
       attrs.recycle()
       Log.d("AnimatedDropletWidget", "viewProperties: \n ${printViewAttributes()}")
     }
   }
-
-  @CallSuper protected fun applyCustomAtrributes() {
-    Log.d("AnimatedDropletWidget", "applyCustomAtrributes")
-  }
   //</editor-fold>
 
-  private fun setupView() {
-    Log.d("AnimatedDropletWidget", "setupView")
-    addOnLayoutChangeListener(this::onLayoutBoundsChanged)
-    clipChildren = false
+
+  private fun constructChildViews() {
+    Log.d("AnimatedDropletWidget", "constructChildViews")
+    if (drawableAlpha != 0 && drawableSize != 0 && drawableSrc != android.R.color.transparent) drawableView =
+        createFrontDrawableView(
+          drawableRes = drawableSrc,
+          alpha = drawableAlpha,
+          size = drawableSize,
+          tag = TAG_DRAWABLE_VAL
+        )
+
   }
 
-  private fun onLayoutBoundsChanged(view: View, left: Int, top: Int, right: Int, bottom: Int, oldLeft: Int, oldTop: Int, oldRight: Int,
-      oldBottom: Int) {
-    if (oldLeft == 0 && oldRight == 0 && oldTop == 0 && oldBottom == 0 && left != 0 && right != 0 && top != 0 && bottom != 0)
-      onLayoutFirstMeasurementApplied()
+  private fun attachChildViews() {
+    Log.d("AnimatedDropletWidget", "attachChildViews")
+    drawableView?.let { addView(drawableView) }
   }
 
-  @CallSuper protected fun onLayoutFirstMeasurementApplied() {
+  override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+    var maxHeight = 0
+    var maxWidth = 0
+    var childState = 0
+
+    getChildren().forEach { child ->
+      measureChildWithMargins(child, widthMeasureSpec, 0, heightMeasureSpec, 0)
+      val params = child.layoutParams as LayoutParams
+      maxWidth = Math.max(maxWidth, child.measuredWidth + params.leftMargin + params.rightMargin)
+      maxHeight = Math.max(maxHeight, child.measuredHeight + params.topMargin + params.bottomMargin)
+      childState = View.combineMeasuredStates(childState, child.measuredState)
+    }
+
+    maxWidth += getPaddingLeftWithForeground() + getPaddingRightWithForeground()
+    maxHeight += getPaddingTopWithForeground() + getPaddingBottomWithForeground()
+    maxHeight = Math.max(maxHeight, suggestedMinimumHeight)
+    maxWidth = Math.max(maxWidth, suggestedMinimumWidth)
+
+    setMeasuredDimension(
+      View.resolveSizeAndState(
+        maxWidth, widthMeasureSpec, childState
+      ), View.resolveSizeAndState(
+        maxHeight, heightMeasureSpec, childState shl MEASURED_HEIGHT_STATE_SHIFT
+      )
+    )
+
+    drawableView?.measure(
+      makeMeasureSpec((measuredWidth * drawableSize / 100f).toInt(), EXACTLY),
+      makeMeasureSpec((measuredHeight * drawableSize / 100f).toInt(), EXACTLY)
+    )
+  }
+
+  override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
+    val count = childCount
+
+    val parentLeft = getPaddingLeftWithForeground()
+    val parentRight = right - left - getPaddingRightWithForeground()
+
+    val parentTop = getPaddingTopWithForeground()
+    val parentBottom = bottom - top - getPaddingBottomWithForeground()
+
+    getChildren().forEach { child ->
+      if (child.isNotHidden()) {
+        val lp = child.layoutParams as LayoutParams
+        val width = child.measuredWidth
+        val height = child.measuredHeight
+        val childLeft = parentLeft + (parentRight - parentLeft - width) / 2 + lp.leftMargin -
+            lp.rightMargin
+        val childTop = parentTop + (parentBottom - parentTop - height) / 2 + lp.topMargin -
+            lp.bottomMargin
+        child.layout(childLeft, childTop, childLeft + width, childTop + height)
+      }
+    }
+  }
+
+
+//  private fun setupView() {
+//    Log.d("AnimatedDropletWidget", "setupView")
+////    addOnLayoutChangeListener(this::onLayoutBoundsChanged)
+////    clipChildren = false
+//  }
+
+  private fun onLayoutBoundsChanged(
+    view: View,
+    left: Int,
+    top: Int,
+    right: Int,
+    bottom: Int,
+    oldLeft: Int,
+    oldTop: Int,
+    oldRight: Int,
+    oldBottom: Int
+  ) {
+    if (oldLeft == 0 && oldRight == 0 && oldTop == 0 && oldBottom == 0 && left != 0 && right != 0 && top != 0 && bottom != 0) onLayoutFirstMeasurementApplied()
+  }
+
+  @CallSuper
+  protected fun onLayoutFirstMeasurementApplied() {
     Log.d("AnimatedDropletWidget", "onLayoutFirstMeasurementApplied")
 
-    createCircularDropletsLayers(layerCount = 0)
+//    createCircularDropletsLayers(
+//      layerCount = dropletCount,
+//      colourRes = globalColour,
+//      colourDistribution = globalColourDistribution,
+//      maxDuration = dropletsMaxDuration,
+//      durationDistribution = dropletsMaxDurationDistribution,
+//      spawnSize = dropletsSpawnsize,
+//      endSizeMin = dropletsEndsizeMin,
+//      endSizeMax = dropletsEndsizeMax,
+//      fadeout = dropletsFadeout,
+//      thickness = dropletsThickness,
+//      thicknessDistribution = dropletsThicknessDistribution,
+//      interpolator = dropletsInterpolator,
+//      randomFactor = globalRandomInfluence
+//    )
+//
+//    createCircularDropletBackgroundLayers(
+//      layerCount = backgroundLayersCount,
+//      colorRes = backgroundColour,
+//      colourDistribution = backgroundColourDistribution,
+//      duration = backgroundMaxDuration,
+//      randomFactor = globalRandomInfluence
+//    )
 
-    createCircularDropletBackgroundLayers(
-        layerCount = backgroundLayersCount,
-        colorRes = backgroundColour,
-        colourDistribution = backgroundColourDistribution,
-        duration = backgroundMaxDuration,
-        randomFactor = globalRandomInfluence
-    )
-
-    createFrontDrawable(
-        alpha = drawableAlpha,
-        size = drawableSize,
-        src = drawableSrc
-    )
+    createFrontDrawable(alpha = drawableAlpha, size = drawableSize, src = drawableSrc)
 
 //    oneShotDropletView = createCircularDropletView(BASE_OVAL_STROKE_THICKNESS, android.R.color.holo_purple)
 //        .apply {
@@ -291,138 +422,182 @@ open class AnimatedDropletWidget : FrameLayout {
 //          addView(this)
 //        }
 
-    Single
-        .timer(1500, TimeUnit.MILLISECONDS)
-        .subscribeBy (
-            onSuccess = { it ->
-              Log.v("AnimatedDropletWidget", "[parent]:\n${this@AnimatedDropletWidget.complexString}")
-              getChildren().forEachIndexed { index, view ->
-                Log.v("AnimatedDropletWidget", "[$index]\n${view.complexString}")
-              }
-            }
-        )
+    Single.timer(1500, TimeUnit.MILLISECONDS).subscribeBy(onSuccess = { it ->
+      Log.v("AnimatedDropletWidget", "[parent]:\n${this@AnimatedDropletWidget.complexString}")
+      getChildren().forEachIndexed { index, view ->
+        Log.v("AnimatedDropletWidget", "[$index]\n${view.complexString}")
+      }
+    })
 
   }
 
-  //<editor-fold desc="Creating layers (">
+  //<editor-fold desc="Creating layers">
   @SuppressLint("LogConditional")
-  private fun createCircularDropletsLayers(layerCount: Int, tag: String = TAG_DROPLET_VAL) {
-    Log.d("AnimatedDropletWidget", "createCircularDropletsLayers, layerCount: $layerCount")
+  private fun createCircularDropletsLayers(
+    layerCount: Int, @ColorRes colourRes: ResourceId,
+    colourDistribution: Float,
+    maxDuration: Millis,
+    durationDistribution: Factor,
+    spawnSize: Percentage,
+    endSizeMin: Percentage,
+    endSizeMax: Percentage,
+    fadeout: Factor,
+    thickness: Float,
+    thicknessDistribution: Factor,
+    interpolator: WidgetInterpolator,
+    randomFactor: Float,
+    tag: String = TAG_DROPLET_VAL
+  ) {
+    //todo: figure out distribution factors
+    //todo: randomFactor not used
+    //todo: interpolator not used
+    Log.d(
+      "AnimatedDropletWidget",
+      "createCircularDropletsLayers, layerCount: $layerCount, colourRes: $colourRes, " + "colourDistribution: $colourDistribution, maxDuration: $maxDuration, durationDistribution: $durationDistribution, " + "spawnSize: $spawnSize, endSizeMin: $endSizeMin, endSizeMax: $endSizeMax, fadeout: $fadeout, thickness: $thickness, " + "thicknessDistribution: $thicknessDistribution, interpolator: $interpolator, randomFactor: $randomFactor, tag: $tag"
+    )
+
+
     (0 until layerCount).mapTo(circularDropletViewLayers) { layerIndex ->
-      createCircularDropletView(
-          thickness = BASE_OVAL_STROKE_THICKNESS - (layerIndex * BASE_OVAL_STROKE_THICKNESS / layerCount),
-          colourId = android.R.color.holo_red_dark,
-          tag = "$tag[$layerIndex]"
-      )
+      createCircularDropletView(thickness, colourRes, "$tag[$layerIndex]", randomFactor)
     }
     //todo: start animation should be as a separate function in onLayoutFirstMeasurementApplied
     addViews(children = circularDropletViewLayers, childApply = { child, index ->
-      child.hide()
-      animateCircularDroplet(child, index, layerCount, 1.0f)
+      val layerDependency = index / layerCount.toFloat()
+      animateCircularDroplet(
+        child,
+        maxDuration,
+        lerp(0L, maxDuration, layerDependency),
+        lerp(0L, maxDuration, layerDependency),
+        spawnSize,
+        lerp(endSizeMin, endSizeMax, layerDependency),
+        randomFactor
+      )
     })
   }
 
   @SuppressLint("LogConditional")
-  private fun createCircularDropletBackgroundLayers(layerCount: Int, @ColorRes colorRes: Int, colourDistribution: Float, duration: Millis,
-      randomFactor: Float, tag: String = TAG_BACKGROUND_VAL) {
+  private fun createCircularDropletBackgroundLayers(
+    layerCount: Int, @ColorRes colorRes: Int,
+    colourDistribution: Float,
+    duration: Millis,
+    randomFactor: Float,
+    tag: String = TAG_BACKGROUND_VAL
+  ) {
     Log.d("AnimatedDropletWidget", "createCircularDropletBackgroundLayers, layerCount: $layerCount")
     (0 until layerCount).mapTo(circularBackgroundLayers) {
       createCircularBackgroundView(
-          colourId = ColorUtils.blendARGB(resources.getColor(colorRes), Color.TRANSPARENT, it / layerCount.toFloat()),
-          alpha = 100,
-          tag = "$tag[$it]"
+        colourRes = ColorUtils.blendARGB(
+          resources.getColor(colorRes), Color.TRANSPARENT, it / layerCount.toFloat()
+        ), alpha = 100, tag = "$tag[$it]"
       ) //todo: colours distribution
     }
 
     addViews(circularBackgroundLayers, { child, index ->
       animateCircularBackground(
-          targetView = child,
-          startTime = lerpLong(0, duration, index / layerCount.toFloat().randomVariation(random, randomFactor)), //todo apply index
-          duration = duration, //todo apply index
-          randomFactor = randomFactor
+        targetView = child, startTime = lerp(
+          0, duration, index / layerCount.toFloat().randomVariation(random, randomFactor)
+        ), //todo apply index
+        duration = duration, //todo apply index
+        randomFactor = randomFactor
       )
     })
   }
 
   @SuppressLint("LogConditional")
-  private fun createFrontDrawable(alpha: Percentage, size: Int, @DrawableRes src: Int, tag: String = TAG_DRAWABLE_VAL) {
-    Log.d("AnimatedDropletWidget", "createFrontDrawable, alpha: $alpha, size: $size, " +
-        "src: $src")
+  private fun createFrontDrawable(
+    alpha: Percentage, size: Int, @DrawableRes src: Int, tag: String = TAG_DRAWABLE_VAL
+  ) {
+    Log.d("AnimatedDropletWidget", "createFrontDrawable, alpha: $alpha, size: $size, src: $src")
     if (alpha != 0 && size != 0 && src != android.R.color.transparent) {
-      drawableView = createFrontDrawableView(drawableRes = src, alpha = alpha, size = size, tag = tag)
+      drawableView =
+          createFrontDrawableView(drawableRes = src, alpha = alpha, size = size, tag = tag)
       addView(drawableView)
     }
   }
   //</editor-fold>
 
-
   //<editor-fold desc="Creating view layers (droplets and backgrounds)">
   @SuppressLint("LogConditional")
-  private fun createCircularDropletView(thickness: Float, @ColorRes colourId: ResourceId, tag: String)
-      = createImageViewWithDrawable(context, createCircularDropletDrawable(thickness, colourId))
-      .apply {
-        this.tag = tag
-      }
-      .also {
-//        it.setTag(TAG_INDEX, TAG_DROPLET_VAL)
-        Log.d("AnimatedDropletWidget", "createCircularDropletView, thickness: $thickness, colourId: ${colourId
-            .toResourceEntryName(context)}, view: ${it.asString()}")
-      }
+  private fun createCircularDropletView(
+    thickness: Float, @ColorRes colourRes: ResourceId, tag: String, randomFactor: Float
+  ) = createImageViewWithDrawable(
+    context, createCircularDropletDrawable(thickness, colourRes)
+  ).apply {
+    this.tag = tag
+    val size = this@AnimatedDropletWidget.size
+    this.setSize(size)
+  }.also {
+      Log.d(
+        "AnimatedDropletWidget",
+        "createCircularDropletView, thickness: $thickness, " + "colourRes: ${colourRes.toResourceEntryName(
+          context
+        )}, view: ${it.asString()}"
+      )
+    }
 
   @SuppressLint("LogConditional")
-  private fun createCircularBackgroundView(@ColorInt colourId: ResourceId, alpha: Percentage = 100, tag: String)
-      = createImageViewWithDrawable(context, createCircularBackgroundDrawable(colourId))
-      .apply {
-        this.tag = tag
-        this.setSize()
-      }
-      .also {
-//        this.alpha = (alpha/100f).clamp(1f, 0f)
-        Log.d("AnimatedDropletWidget", "createCircularBackgroundView, alpha: $alpha, " +
-            "colourId: $colourId, view: ${it.asString()}")
-      }
+  private fun createCircularBackgroundView(
+    @ColorInt colourRes: ResourceId, alpha: Percentage = 100, tag: String
+  ) = createImageViewWithDrawable(context, createCircularBackgroundDrawable(colourRes)).apply {
+    this.tag = tag
+    this.setSize(this@AnimatedDropletWidget.layoutParams.size)
+  }.also {
+      //        this.alpha = (alpha/100f).clamp(1f, 0f)
+      Log.d(
+        "AnimatedDropletWidget",
+        "createCircularBackgroundView, alpha: $alpha, " + "colourRes: $colourRes, view: ${it.asString()}"
+      )
+    }
 
   @SuppressLint("LogConditional")
-  private fun createFrontDrawableView(@DrawableRes drawableRes: ResourceId, alpha: Percentage, size: Percentage, tag: String)
-      = createImageViewWithDrawable(context, drawableRes.let { resources.getDrawable(drawableRes) })
-      .apply {
-        this.tag = tag
+  private fun createFrontDrawableView(
+    @DrawableRes drawableRes: ResourceId, alpha: Percentage, size: Percentage, tag: String
+  ) = createImageViewWithDrawable(context,
+    drawableRes.let { resources.getDrawable(drawableRes) }).apply {
+    this.tag = tag
 //        this.setTag(TAG_INDEX, TAG_DRAWABLE_VAL)
-        this.alpha = alpha / 100f
-        this.setSize(
-            (this@AnimatedDropletWidget.layoutParams.width * size / 100f).toInt(),
-            (this@AnimatedDropletWidget.layoutParams.height * size / 100f).toInt())
-        this.center(this@AnimatedDropletWidget.layoutParams.width, this@AnimatedDropletWidget.layoutParams.height)
-      }
-      .also {
-        Log.d("AnimatedDropletWidget", "createFrontDrawableView, drawableRes: ${drawableRes.toResourceEntryName(context)}" +
-            "alpha: $alpha, size: $size, view: ${it.asString()}")
-      }
+    this.alpha = alpha / 100f
+//      val tmp = this@AnimatedDropletWidget.layoutParams.width
+//      this.setSize(
+//        (this@AnimatedDropletWidget.layoutParams.width * size / 100f).toInt(),
+//        (this@AnimatedDropletWidget.layoutParams.height * size / 100f).toInt()
+//      )
+//      this.center(
+//        this@AnimatedDropletWidget.layoutParams.width,
+//        this@AnimatedDropletWidget.layoutParams.height
+//      )
+  }.also {
+      Log.d(
+        "AnimatedDropletWidget",
+        "createFrontDrawableView, drawableRes: ${drawableRes.toResourceEntryName(context)}" + "alpha: $alpha, size: $size, view: ${it.asString()}"
+      )
+    }
   //</editor-fold>
-
 
   //<editor-fold desc="Creating drawables">
   @SuppressLint("LogConditional")
-  private fun createCircularDropletDrawable(strokeThickness: Float, @ColorRes colourId: ResourceId) =
-      ShapeDrawable(OvalShape()).apply {
-        this.intrinsicHeight = this@AnimatedDropletWidget.height
-        this.intrinsicWidth = this@AnimatedDropletWidget.width
-        this.paint.strokeWidth = strokeThickness
-        this.paint.style = STROKE
-        this.paint.color = resources.getColor(colourId)
-      }.also {
+  private fun createCircularDropletDrawable(strokeThickness: Float, @ColorRes colourRes: ResourceId) =
+    ShapeDrawable(OvalShape()).apply {
+      this.intrinsicHeight = this@AnimatedDropletWidget.height
+      this.intrinsicWidth = this@AnimatedDropletWidget.width
+      this.paint.strokeWidth = strokeThickness
+      this.paint.style = STROKE
+      this.paint.color = resources.getColor(colourRes)
+    }.also {
         Log.d("AnimatedDropletWidget", "createCircularDropletDrawable, drawable: ${it.asString()}")
       }
 
   @SuppressLint("LogConditional")
-  private fun createCircularBackgroundDrawable(@ColorInt colourId: ResourceId) =
-      ShapeDrawable(OvalShape()).apply {
-        this.intrinsicHeight = this@AnimatedDropletWidget.height
-        this.intrinsicWidth = this@AnimatedDropletWidget.width
-        this.paint.style = FILL
-        this.paint.color = colourId
-      }.also {
-        Log.d("AnimatedDropletWidget", "createCircularBackgroundDrawable, drawable: ${it.asString()}")
+  private fun createCircularBackgroundDrawable(@ColorInt colourRes: ResourceId) =
+    ShapeDrawable(OvalShape()).apply {
+      this.intrinsicHeight = this@AnimatedDropletWidget.height
+      this.intrinsicWidth = this@AnimatedDropletWidget.width
+      this.paint.style = FILL
+      this.paint.color = colourRes
+    }.also {
+        Log.d(
+          "AnimatedDropletWidget", "createCircularBackgroundDrawable, drawable: ${it.asString()}"
+        )
       }
 
   //</editor-fold>
@@ -430,180 +605,261 @@ open class AnimatedDropletWidget : FrameLayout {
   //<editor-fold desc="Animating views">
   @SuppressLint("LogConditional")
   //todo: add endsize to this
-  private fun animateCircularBackground(targetView: View, startTime: Millis, duration: Millis, randomFactor: Float) {
-    Log.d("AnimatedDropletWidget", "animateCircularBackground, targetView: ${targetView.asString()}")
+  private fun animateCircularBackground(
+    targetView: View, startTime: Millis, duration: Millis, randomFactor: Float
+  ) {
+    Log.d(
+      "AnimatedDropletWidget", "animateCircularBackground, targetView: ${targetView.asString()}"
+    )
     val repeatDelay = (duration / 10)
     targetView.show()
-    AnimationSet(false)
-        .also { set ->
-          set.addAnimation(createScalingAnimation(
-              parentContainer = this,
-              duration = duration,
-              startTime = startTime,
-              repeatDelay = repeatDelay,
-              xyStart = 0f,
-              xyEnd = 1f,
-              interpolator = FastOutLinearInInterpolator(),
-              timeCutoff = 1.0f
-          ))
-          set.addAnimation(createFadeoutAnimation(
-              parentContainer = this,
-              duration = duration,
-              repeatDelay = repeatDelay,
-              startTime = startTime,
-              alphaStart = 1f,
-              alphaEnd = 0.00f,
-              interpolator = FastOutLinearInInterpolator(),
-              timeCutoff = 0.99f
-          ))
-          set.attach(targetView)
-        }.start()
+    AnimationSet(false).also { set ->
+      set.addAnimation(
+        createScalingAnimation(
+          parentContainer = this,
+          duration = duration,
+          startTime = startTime,
+          repeatDelay = repeatDelay,
+          xyStart = 0f,
+          xyEnd = 1f,
+          interpolator = FastOutLinearInInterpolator(),
+          timeCutoff = 1.0f
+        )
+      )
+      set.addAnimation(
+        createFadeoutAnimation(
+          parentContainer = this,
+          duration = duration,
+          repeatDelay = repeatDelay,
+          startTime = startTime,
+          alphaStart = 1f,
+          alphaEnd = 0.00f,
+          interpolator = FastOutLinearInInterpolator(),
+          timeCutoff = 0.99f
+        )
+      )
+      set.attach(targetView)
+    }.start()
   }
 
   @SuppressLint("LogConditional")
-  private fun animateCircularDroplet(targetView: View, layerIndex: Int, layerCount: Int, layerDependency: Float) {
-    val startTime = random.nextInt(ANIMATION_RANDOM_START_TIME_BOUND_MILLIS.toInt()).toLong()
-    val repeatDelayAddition = random.nextInt(ANIMATION_RANDOM_REPEAT_DELAY_BOUND_MILLIS.toInt()).toLong()
-    val layerValuesMultiplier = layerIndex / layerCount * layerDependency
-    val inverseLerp = inverseLerp(0, layerCount, layerIndex.toFloat())
-    Log.d("AnimatedDropletWidget",
-        "animateCircularDroplet, layerIndex: $layerIndex, layerCount: $layerCount, layerDependency: $layerDependency, inverseLerp: " +
-            "$inverseLerp, layerValuesMultiplier: $layerValuesMultiplier")
-    targetView.show()
-    AnimationSet(false)
-        .also { set ->
-          set.fillAfter = true
-          set.isFillEnabled = true
-          set.addAnimation(createScalingAnimation(
-              parentContainer = this,
-              duration = lerpLong(first = BASE_ANIMATION_LENGTH_MIN_MILLIS, second = BASE_ANIMATION_LENGTH_MILLIS, factor = inverseLerp),
-              startTime = startTime,
-              repeatDelay = BASE_ANIMATION_REPEAT_DELAY_MILLIS + repeatDelayAddition,
-              xyStart = 0.00f,
-              xyEnd = lerp(0.70f, 1.00f, inverseLerp),
-              interpolator = AnticipateOvershootInterpolator(lerp(1.33f, 0.25f, inverseLerp)),
-              timeCutoff = lerp(0.8f, 0.98f, inverseLerp)
-          ))
-          set.addAnimation(createFadeoutAnimation(
-              parentContainer = this,
-              duration = lerp(
-                  first = BASE_ANIMATION_LENGTH_MIN_MILLIS,
-                  second = BASE_ANIMATION_LENGTH_MILLIS,
-                  factor = inverseLerp(0, layerCount, layerIndex.toFloat())
-              ).toLong(),
-              repeatDelay = BASE_ANIMATION_REPEAT_DELAY_MILLIS + repeatDelayAddition,
-              startTime = startTime,
-//              alphaStart = lerp(0.15f, 0.55f, inverseLerp),
-              alphaStart = lerp(0.50f, 1.00f, inverseLerp),
-              alphaEnd = 0.00f,
-              interpolator = AccelerateInterpolator(lerp(1.10f, 0.85f, inverseLerp)),
-              timeCutoff = lerp(0.90f, 0.97f, inverseLerp)
-          ))
-          set.attach(targetView)
-        }.start()
+  private fun animateCircularDroplet(
+    targetView: View,
+    duration: Millis,
+    startTime: Millis,
+    repeatDelay: Millis,
+    spawnSize: Percentage,
+    endSize: Percentage,
+    randomFactor: Float
+  ) {
+    Log.d(
+      "AnimatedDropletWidget",
+      "animateCircularDroplet, targetView: $targetView, duration: $duration, " + "startTime: $startTime, repeatDelay: $repeatDelay, spawnSize: $spawnSize, " + "endSize: $endSize, randomFactor: $randomFactor"
+    )
+    AnimationSet(false).also { set ->
+      set.fillAfter = true
+      set.isFillEnabled = true
+      set.addAnimation(
+        createScalingAnimation(
+          parentContainer = this,
+          duration = duration,
+          startTime = startTime,
+          repeatDelay = repeatDelay,
+          xyStart = spawnSize / 100f,
+          xyEnd = endSize / 100f,
+          interpolator = AnticipateOvershootInterpolator(1.25f),
+          timeCutoff = 0.95f
+        )
+      )
+      set.addAnimation(
+        createFadeoutAnimation(
+          parentContainer = this,
+          duration = duration,
+          repeatDelay = repeatDelay,
+          startTime = startTime,
+          alphaStart = 0.75f,
+          alphaEnd = 0.00f,
+          interpolator = AccelerateInterpolator(1.05f),
+          timeCutoff = 0.98f
+        )
+      )
+      set.attach(targetView)
+    }.start()
   }
+
+//  @SuppressLint("LogConditional")
+//  private fun animateCircularDroplet(targetView: View, layerIndex: Int, layerCount: Int, layerDependency: Float, randomFactor: Float) {
+//    val startTime = random.nextInt(ANIMATION_RANDOM_START_TIME_BOUND_MILLIS.toInt()).toLong()
+//    val repeatDelayAddition = random.nextInt(ANIMATION_RANDOM_REPEAT_DELAY_BOUND_MILLIS.toInt()).toLong()
+//    val layerValuesMultiplier = layerIndex / layerCount * layerDependency
+//    val inverseLerp = inverseLerp(0, layerCount, layerIndex.toFloat())
+////    Log.d(
+////      "AnimatedDropletWidget",
+////      "animateCircularDroplet, layerIndex: $layerIndex, layerCount: $layerCount, layerDependency: $layerDependency, inverseLerp: $inverseLerp, layerValuesMultiplier: $layerValuesMultiplier"
+////    )
+////    targetView.show()
+//    AnimationSet(false).also { set ->
+//      set.fillAfter = true
+//      set.isFillEnabled = true
+//      set.addAnimation(
+//        createScalingAnimation(
+//          parentContainer = this,
+//          duration = lerpLong(first = BASE_ANIMATION_LENGTH_MIN_MILLIS, second = BASE_ANIMATION_LENGTH_MILLIS, factor = inverseLerp),
+//          startTime = startTime,
+//          repeatDelay = BASE_ANIMATION_REPEAT_DELAY_MILLIS + repeatDelayAddition,
+//          xyStart = 0.00f,
+//          xyEnd = lerp(0.70f, 1.00f, inverseLerp),
+//          interpolator = AnticipateOvershootInterpolator(lerp(1.33f, 0.25f, inverseLerp)),
+//          timeCutoff = lerp(0.8f, 0.98f, inverseLerp)
+//        )
+//      )
+//      set.addAnimation(
+//        createFadeoutAnimation(
+//          parentContainer = this,
+//          duration = lerp(
+//            first = BASE_ANIMATION_LENGTH_MIN_MILLIS,
+//            second = BASE_ANIMATION_LENGTH_MILLIS,
+//            factor = inverseLerp(0, layerCount, layerIndex.toFloat())
+//          ).toLong(),
+//          repeatDelay = BASE_ANIMATION_REPEAT_DELAY_MILLIS + repeatDelayAddition,
+//          startTime = startTime,
+////              alphaStart = lerp(0.15f, 0.55f, inverseLerp),
+//          alphaStart = lerp(0.50f, 1.00f, inverseLerp),
+//          alphaEnd = 0.00f,
+//          interpolator = AccelerateInterpolator(lerp(1.10f, 0.85f, inverseLerp)),
+//          timeCutoff = lerp(0.90f, 0.97f, inverseLerp)
+//        )
+//      )
+//      set.attach(targetView)
+//    }.start()
+//  }
+
+
   //</editor-fold>
 
   //<editor-fold desc="Animations builders">
   @SuppressLint("LogConditional")
-  private fun createScalingAnimation(parentContainer: View, duration: Millis, startTime: Millis, repeatDelay: Millis,
-      xyStart: Float, xyEnd: Float, interpolator: Interpolator, timeCutoff: Float = 1.0f, oneShot: Boolean = false)
-      = ScaleAnimation(xyStart, xyEnd, xyStart, xyEnd, parentContainer.width / 2f, parentContainer.height / 2f)
-      .also { animation ->
-        Log.d("AnimatedDropletWidget", "createScalingAnimation, duration: $duration, startTime: $startTime, repeatDelay: $repeatDelay, " +
-            "xyStart: $xyStart, xyEnd: $xyEnd, interpolator: ${interpolator::class.java.simpleName}, timeCutoff: $timeCutoff")
-        animation.duration = duration
-        animation.startOffset = startTime
-        animation.repeatCount = if (oneShot) 0 else Animation.INFINITE
-        animation.repeatMode = Animation.RESTART
-        animation.interpolator = CutoffInterpolator(sourceInterpolator = interpolator, cutoff = timeCutoff)
-        animation.setListenerBy(
-            onStart = {
-//              Log.d("AnimatedDropletWidget", "createScalingAnimation.onStart")
-            },
-            onEnd = {
-//              Log.d("AnimatedDropletWidget", "createScalingAnimation.onEnd")
-            },
-            onRepeat = {
-//              Log.d("AnimatedDropletWidget", "createScalingAnimation.onRepeat")
-              animation.startOffset = repeatDelay
-            })
-      }
+  private fun createScalingAnimation(
+    parentContainer: View,
+    duration: Millis,
+    startTime: Millis,
+    repeatDelay: Millis,
+    xyStart: Float,
+    xyEnd: Float,
+    interpolator: Interpolator,
+    timeCutoff: Float = 1.0f,
+    oneShot: Boolean = false
+  ) = ScaleAnimation(
+    xyStart, xyEnd, xyStart, xyEnd, parentContainer.width / 2f, parentContainer.height / 2f
+  ).also { animation ->
+    Log.d(
+      "AnimatedDropletWidget",
+      "createScalingAnimation, duration: $duration, startTime: $startTime, repeatDelay: $repeatDelay, " + "xyStart: $xyStart, xyEnd: $xyEnd, interpolator: ${interpolator::class.java.simpleName}, timeCutoff: $timeCutoff"
+    )
+    animation.duration = duration
+    animation.startOffset = startTime
+    animation.repeatCount = if (oneShot) 0 else Animation.INFINITE
+    animation.repeatMode = Animation.RESTART
+    animation.interpolator =
+        CutoffInterpolator(sourceInterpolator = interpolator, cutoff = timeCutoff)
+    animation.setListenerBy(onStart = {
+      //              Log.d("AnimatedDropletWidget", "createScalingAnimation.onStart")
+    }, onEnd = {
+      //              Log.d("AnimatedDropletWidget", "createScalingAnimation.onEnd")
+    }, onRepeat = {
+      //              Log.d("AnimatedDropletWidget", "createScalingAnimation.onRepeat")
+      animation.startOffset = repeatDelay //todo: should it be here?
+    })
+  }
 
 
   @SuppressLint("LogConditional")
-  private fun createFadeoutAnimation(parentContainer: View, duration: Millis, startTime: Millis, repeatDelay: Millis,
-      alphaStart: Float, alphaEnd: Float, interpolator: Interpolator, timeCutoff: Float, oneShot: Boolean = false) =
-      AlphaAnimation(alphaStart, alphaEnd)
-          .also { animation ->
-            Log.d("AnimatedDropletWidget",
-                "createFadeoutAnimation, duration: $duration, startTime: $startTime, repeatDelay: $repeatDelay, " +
-                    "alphaStart: $alphaStart, alphaEnd: $alphaEnd, interpolator: ${interpolator::class.java.simpleName}, timeCutoff: $timeCutoff")
-            animation.duration = duration
-            animation.startOffset = startTime
-            animation.repeatCount = if (oneShot) 0 else Animation.INFINITE
-            animation.repeatMode = Animation.RESTART
-            animation.isFillEnabled = true
-            animation.fillAfter = true
-            animation.fillBefore = false
-            animation.interpolator = CutoffInterpolator(sourceInterpolator = interpolator, cutoff = timeCutoff)
-            animation.setListenerBy(
-                onStart = {
-//                  Log.d("AnimatedDropletWidget", "createScalingAnimation.onStart")
-                },
-                onEnd = {
-//                  Log.d("AnimatedDropletWidget", "createScalingAnimation.onEnd")
-                },
-                onRepeat = {
-//                  Log.d("AnimatedDropletWidget", "createScalingAnimation.onRepeat")
-                  animation.startOffset = repeatDelay
-                })
-          }
+  private fun createFadeoutAnimation(
+    parentContainer: View,
+    duration: Millis,
+    startTime: Millis,
+    repeatDelay: Millis,
+    alphaStart: Float,
+    alphaEnd: Float,
+    interpolator: Interpolator,
+    timeCutoff: Float,
+    oneShot: Boolean = false
+  ) = AlphaAnimation(alphaStart, alphaEnd).also { animation ->
+    Log.d(
+      "AnimatedDropletWidget",
+      "createFadeoutAnimation, duration: $duration, startTime: $startTime, repeatDelay: $repeatDelay, " + "alphaStart: $alphaStart, alphaEnd: $alphaEnd, interpolator: ${interpolator::class.java.simpleName}, timeCutoff: $timeCutoff"
+    )
+    animation.duration = duration
+    animation.startOffset = startTime
+    animation.repeatCount = if (oneShot) 0 else Animation.INFINITE
+    animation.repeatMode = Animation.RESTART
+    animation.isFillEnabled = true
+    animation.fillAfter = true
+    animation.fillBefore = false
+    animation.interpolator =
+        CutoffInterpolator(sourceInterpolator = interpolator, cutoff = timeCutoff)
+    animation.setListenerBy(onStart = {
+      //                  Log.d("AnimatedDropletWidget", "createScalingAnimation.onStart")
+    }, onEnd = {
+      //                  Log.d("AnimatedDropletWidget", "createScalingAnimation.onEnd")
+    }, onRepeat = {
+      //                  Log.d("AnimatedDropletWidget", "createScalingAnimation.onRepeat")
+      animation.startOffset = repeatDelay
+    })
+  }
   //</editor-fold>
 
   fun performOneShotAnimation() {
     Log.d("AnimatedDropletWidget", "performOneShotAnimation")
     oneShotDropletView?.let {
       this.show()
-      AnimationSet(false)
-          .also { set ->
-            set.fillAfter = true
-            set.isFillEnabled = true
-            set.addAnimation(createScalingAnimation(
-                parentContainer = this,
-                duration = BASE_ANIMATION_LENGTH_MILLIS,
-                startTime = 0,
-                repeatDelay = 0,
-                xyStart = 0.00f,
-                xyEnd = 1.00f,
-                interpolator = AnticipateOvershootInterpolator(0.80f),
-                timeCutoff = 1.00f,
-                oneShot = true
-            ))
-            set.addAnimation(createFadeoutAnimation(
-                parentContainer = this,
-                duration = BASE_ANIMATION_LENGTH_MILLIS,
-                repeatDelay = 0,
-                startTime = 0,
-                alphaStart = 1.00f,
-                alphaEnd = 0.00f,
-                interpolator = AccelerateInterpolator(0.5f),
-                timeCutoff = 1.0f,
-                oneShot = true
-            ))
-            set.attach(this)
-          }.start()
+      AnimationSet(false).also { set ->
+        set.fillAfter = true
+        set.isFillEnabled = true
+        set.addAnimation(
+          createScalingAnimation(
+            parentContainer = this,
+            duration = BASE_ANIMATION_LENGTH_MILLIS,
+            startTime = 0,
+            repeatDelay = 0,
+            xyStart = 0.00f,
+            xyEnd = 1.00f,
+            interpolator = AnticipateOvershootInterpolator(0.80f),
+            timeCutoff = 1.00f,
+            oneShot = true
+          )
+        )
+        set.addAnimation(
+          createFadeoutAnimation(
+            parentContainer = this,
+            duration = BASE_ANIMATION_LENGTH_MILLIS,
+            repeatDelay = 0,
+            startTime = 0,
+            alphaStart = 1.00f,
+            alphaEnd = 0.00f,
+            interpolator = AccelerateInterpolator(0.5f),
+            timeCutoff = 1.0f,
+            oneShot = true
+          )
+        )
+        set.attach(this)
+      }.start()
     }
   }
 
   @SuppressLint("LogConditional")
   private fun addViews(children: List<View>, childApply: (View, Int) -> (Unit)) {
-    Log.d("AnimatedDropletWidget", "addViews, children.count: ${children.size}, children: ${children.map { it.asString() }}")
-      children.forEachIndexed { index, child ->
-        this@AnimatedDropletWidget.addView(child)
-        childApply.invoke(child, index)
-      }
-    Log.d("AnimatedDropletWidget", "addViews, this.children: ${getChildren().map { it.asString() }}")
+    Log.d(
+      "AnimatedDropletWidget",
+      "addViews, children.count: ${children.size}, children: ${children.map { it.asString() }}"
+    )
+    children.forEachIndexed { index, child ->
+      this@AnimatedDropletWidget.addView(child)
+      childApply.invoke(child, index)
+    }
+    Log.d(
+      "AnimatedDropletWidget", "addViews, this.children: ${getChildren().map { it.asString() }}"
+    )
     Log.d("AnimatedDropletWidget", "[parent]:\n${this@AnimatedDropletWidget.complexString}")
     getChildren().forEachIndexed { index, view ->
       Log.d("AnimatedDropletWidget", "[$index]\n${view.complexString}")
@@ -611,54 +867,46 @@ open class AnimatedDropletWidget : FrameLayout {
   }
 
   private fun createInterpolator(randomFactor: Float) =
-      if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) createInterpolatorApiLollipop(randomFactor)
-      else createInterpolatorPreApiLollipop()
+    if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) createInterpolatorApiLollipop(randomFactor)
+    else createInterpolatorPreApiLollipop()
 
   @RequiresApi(VERSION_CODES.LOLLIPOP)
-  private fun createInterpolatorApiLollipop(randomFactor: Float) = PathInterpolator(generateDropletBackgroundPath(random, randomFactor))
+  private fun createInterpolatorApiLollipop(randomFactor: Float) =
+    PathInterpolator(generateDropletBackgroundPath(random, randomFactor))
 
   private fun createInterpolatorPreApiLollipop() = AccelerateDecelerateInterpolator()
 
   //proven that this feels good on the ui with serious laboratory testing. true story
-  private fun generateDropletBackgroundPath(random: Random, randomFactor: Float = 0.005f) = Path().apply {
-    moveTo(0.000f, 0.000f)
-    quadTo(0.065f, 0.325f, 0.150f, 0.400f.randomVariation(random, randomFactor))
-    lineTo(0.330f, 0.300f.randomVariation(random, randomFactor / 2f))
-    quadTo(0.390f, 0.630f, 0.420f, 0.690f.randomVariation(random, randomFactor))
-    lineTo(0.690f, 0.480f.randomVariation(random, randomFactor / 2f))
-    quadTo(0.725f, 0.85f, 0.740f, 0.900f.randomVariation(random, randomFactor))
-    lineTo(0.930f, 0.710f.randomVariation(random, randomFactor / 2f))
-    quadTo(0.965f, 0.925f, 1.000f, 1.000f)
+  private fun generateDropletBackgroundPath(random: Random, randomFactor: Float = 0.005f) =
+    Path().apply {
+      moveTo(0.000f, 0.000f)
+      quadTo(0.065f, 0.325f, 0.150f, 0.400f.randomVariation(random, randomFactor))
+      lineTo(0.330f, 0.300f.randomVariation(random, randomFactor / 2f))
+      quadTo(0.390f, 0.630f, 0.420f, 0.690f.randomVariation(random, randomFactor))
+      lineTo(0.690f, 0.480f.randomVariation(random, randomFactor / 2f))
+      quadTo(0.725f, 0.85f, 0.740f, 0.900f.randomVariation(random, randomFactor))
+      lineTo(0.930f, 0.710f.randomVariation(random, randomFactor / 2f))
+      quadTo(0.965f, 0.925f, 1.000f, 1.000f)
+    }
+
+  override fun addView(child: View?) {
+    Log.d("AnimatedDropletWidget", "addView, child: ${child?.complexString}")
+    super.addView(child)
   }
 
-  private fun printViewAttributes() = StringBuilder(1024)
-      .append(
-          "drawableSrc: ${drawableSrc.toResourceEntryName(context)}\n" +
-              "drawableAlpha: $drawableAlpha\n" +
-              "dropletCount: $dropletCount\n" +
-              "backgroundLayersCount: $backgroundLayersCount\n" +
-              "oneshotLayersCount: $oneshotLayersCount\n" +
-              "globalRandomInfluence: $globalRandomInfluence\n" +
-              "globalMaxDuration: $globalMaxDuration\n" +
-              "globalColour: $globalColour\n" +
-              "globalColourDistribution: $globalColourDistribution\n" +
-              "globalInterpolator: $globalInterpolator\n" +
-              "dropletsMaxDuration: $dropletsMaxDuration\n" +
-              "dropletsMaxDurationDistribution: $dropletsMaxDurationDistribution\n" +
-              "dropletsSpawnsize: $dropletsSpawnsize\n" +
-              "dropletsEndsizeMin: $dropletsEndsizeMin\n" +
-              "dropletsEndsizeMax: $dropletsEndsizeMax\n" +
-              "dropletsFadeout: $dropletsFadeout\n" +
-              "dropletsThickness: $dropletsThickness\n" +
-              "dropletsThicknessDistribution: $dropletsThicknessDistribution\n" +
-              "dropletsInterpolator: $dropletsInterpolator\n" +
-              "backgroundMaxDuration: $backgroundMaxDuration\n" +
-              "backgroundEndsizeMin: $backgroundEndsizeMin\n" +
-              "backgroundEndsizeMax: $backgroundEndsizeMax\n" +
-              "backgroundColour: $backgroundColour\n" +
-              "backgroundColourDistribution: $backgroundColourDistribution\n" +
-              "backgroundInterpolator: $backgroundInterpolator\n" +
-              "oneshotMaxDuration: $oneshotMaxDuration\n" +
-              "oneshotColour: $oneshotColour\n" +
-              "oneshotInterpolator: $oneshotInterpolator")
+  private fun getPaddingLeftWithForeground() =
+    paddingLeft + (foreground?.run { this.padding.left } ?: 0)
+
+  private fun getPaddingRightWithForeground() =
+    paddingRight + (foreground?.run { this.padding.right } ?: 0)
+
+  private fun getPaddingTopWithForeground() =
+    paddingTop + (foreground?.run { this.padding.top } ?: 0)
+
+  private fun getPaddingBottomWithForeground() =
+    paddingBottom + (foreground?.run { this.padding.bottom } ?: 0)
+
+
+  private fun printViewAttributes() =
+    StringBuilder(1024).append("drawableSrc: ${drawableSrc.toResourceEntryName(context)}\n" + "drawableAlpha: $drawableAlpha\n" + "drawableSize: $drawableSize\n" + "dropletCount: $dropletCount\n" + "backgroundLayersCount: $backgroundLayersCount\n" + "oneshotLayersCount: $oneshotLayersCount\n" + "globalRandomInfluence: $globalRandomInfluence\n" + "globalMaxDuration: $globalMaxDuration\n" + "globalColour: $globalColour\n" + "globalColourDistribution: $globalColourDistribution\n" + "globalInterpolator: $globalInterpolator\n" + "dropletsMaxDuration: $dropletsMaxDuration\n" + "dropletsMaxDurationDistribution: $dropletsMaxDurationDistribution\n" + "dropletsSpawnsize: $dropletsSpawnsize\n" + "dropletsEndsizeMin: $dropletsEndsizeMin\n" + "dropletsEndsizeMax: $dropletsEndsizeMax\n" + "dropletsFadeout: $dropletsFadeout\n" + "dropletsThickness: $dropletsThickness\n" + "dropletsThicknessDistribution: $dropletsThicknessDistribution\n" + "dropletsInterpolator: $dropletsInterpolator\n" + "backgroundMaxDuration: $backgroundMaxDuration\n" + "backgroundEndsizeMin: $backgroundEndsizeMin\n" + "backgroundEndsizeMax: $backgroundEndsizeMax\n" + "backgroundColour: $backgroundColour\n" + "backgroundColourDistribution: $backgroundColourDistribution\n" + "backgroundInterpolator: $backgroundInterpolator\n" + "oneshotMaxDuration: $oneshotMaxDuration\n" + "oneshotColour: $oneshotColour\n" + "oneshotInterpolator: $oneshotInterpolator")
 }

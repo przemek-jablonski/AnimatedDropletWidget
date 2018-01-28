@@ -12,9 +12,7 @@ import android.view.animation.Interpolator
 private const val STANDARD_BOUNCINESS_FACTOR = 8.0f
 
 class BouncingInterpolator(
-    private val bouncinessFactor: Float = STANDARD_BOUNCINESS_FACTOR,
-    private val bouncinessInputMultiplier: Float = 1.1226f
-) : Interpolator {
+  private val bouncinessFactor: Float = STANDARD_BOUNCINESS_FACTOR, private val bouncinessInputMultiplier: Float = 1.1226f) : Interpolator {
 
   private val standardToCustomBoucinessFactorRatio = bouncinessFactor / STANDARD_BOUNCINESS_FACTOR
 
@@ -28,6 +26,7 @@ class BouncingInterpolator(
     }
   }
 
-  private fun bounce(t: Float): Float = t * t * bouncinessFactor
+  private fun bounce(t: Float): Float =
+    t * t * bouncinessFactor
 
 }

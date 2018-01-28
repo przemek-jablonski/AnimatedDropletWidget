@@ -484,7 +484,7 @@ class MathExtensionsTest {
       a = random.nextFloat(-100f, 100f)
       b = random.nextFloat(-100f, 100f)
       factor = random.nextFloat(0.001f, 0.999f)
-      val outputLerpLong = lerpLong(a.roundToLong(), b.roundToLong(), factor)
+      val outputLerpLong = lerp(a.roundToLong(), b.roundToLong(), factor)
       assertThat(lerp(a, b, factor).roundToLong()).isBetween(outputLerpLong - 1, outputLerpLong + 1) //approximation due to casting issues
     }
   }
