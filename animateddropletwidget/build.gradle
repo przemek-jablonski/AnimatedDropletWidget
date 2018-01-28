@@ -58,6 +58,7 @@ dependencies {
   implementation group: 'io.reactivex.rxjava2', name: 'rxandroid', version: '2.0.1'
   implementation group: 'io.reactivex.rxjava2', name: 'rxjava', version: '2.1.9'
   implementation group: 'io.reactivex.rxjava2', name: 'rxkotlin', version: '2.2.0'
+implementation 'com.jakewharton.timber:timber:4.6.0'
 
 
 }
