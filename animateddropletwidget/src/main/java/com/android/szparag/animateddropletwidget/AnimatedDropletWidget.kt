@@ -12,7 +12,6 @@ import android.graphics.drawable.shapes.OvalShape
 import android.support.annotation.CallSuper
 import android.support.annotation.ColorRes
 import android.support.annotation.DrawableRes
-import android.support.v4.graphics.ColorUtils
 import android.support.v4.view.animation.FastOutLinearInInterpolator
 import android.util.AttributeSet
 import android.view.View
@@ -90,6 +89,8 @@ private const val BACKGROUND_REPEATDELAY_BASE_RANDOM_FACTOR = BACKGROUND_DURATIO
 private const val BACKGROUND_STARTTIME_BASE_RANDOM_FACTOR = BACKGROUND_DURATION_BASE_RANDOM_FACTOR / 4F
 private const val BACKGROUND_ENDSIZE_BASE_RANDOM_FACTOR = 0.05F
 
+private const val BACKGROUND_ENDSIZE_MIN_OVERHEAD : Percentage = 5
+
 @SuppressLint("BinaryOperationInTimber") //todo: remove timber
 open class AnimatedDropletWidget : FrameLayout {
 
@@ -122,7 +123,7 @@ open class AnimatedDropletWidget : FrameLayout {
   private var dropletsThickness = ATTRS_DROPLETS_THICKNESS
 
   private var backgroundMaxDuration = ATTRS_BACKGROUND_MAX_DURATION
-  private var backgroundEndsizeMin = drawableSize
+  private var backgroundEndsizeMin = (drawableSize * (1 + BACKGROUND_ENDSIZE_MIN_OVERHEAD)).coerceAtMost(100)
   private var backgroundEndsizeMax = ATTRS_BACKGROUND_ENDSIZE_MAX
   private var backgroundColour = ATTRS_BACKGROUND_COLOUR
   private var backgroundFadeout = ATTRS_BACKGROUND_FADEOUT
@@ -159,7 +160,6 @@ open class AnimatedDropletWidget : FrameLayout {
 
   //<editor-fold desc="Custom view Lifecycle callbacks">
   constructor(context: Context) : this(context, null)
-
   constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
   constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
     Timber.plant(Timber.DebugTree())
@@ -171,7 +171,6 @@ open class AnimatedDropletWidget : FrameLayout {
     constructChildViews()
     attachChildViews()
   }
-
 
   override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
     var maxHeight = 0
@@ -219,7 +218,6 @@ open class AnimatedDropletWidget : FrameLayout {
     printViewParentAndChildren()
   }
 
-
   override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
     val parentLeft = getPaddingLeftWithForeground()
     val parentRight = right - left - getPaddingRightWithForeground()
@@ -238,7 +236,8 @@ open class AnimatedDropletWidget : FrameLayout {
     }
 
     printViewParentAndChildren()
-    updateDrawables()
+    constructDrawables()
+    constructAnimations()
     startAnimations()
 //    Single.timer(1000, TimeUnit.MILLISECONDS).subscribeBy(onSuccess = {
 //      printViewParentAndChildren()
@@ -246,7 +245,6 @@ open class AnimatedDropletWidget : FrameLayout {
   }
   //</editor-fold>
 
-  @CallSuper
   private fun fetchCustomAttributes(attrs: TypedArray) {
     Timber.d("viewProperties: \n ${printViewAttributes()}")
     try {
@@ -313,38 +311,6 @@ open class AnimatedDropletWidget : FrameLayout {
     }
   }
 
-  private fun attachChildViews() {
-    addViews(circularBackgroundLayers)
-    addViews(circularDropletsLayers)
-    oneShotDropletView?.let(this::addView)
-    drawableView?.let(this::addView)
-  }
-
-  private fun updateDrawables() {
-    setDrawableForBackgroundLayers(measuredWidth, measuredHeight)
-    setDrawableForDropletLayers(measuredWidth, measuredHeight)
-  }
-
-  private fun startAnimations() {
-    animateBackgroundLayers(
-      maxDuration = backgroundMaxDuration,
-      endsizeMin = backgroundEndsizeMin,
-      endsizeMax = backgroundEndsizeMax,
-      fadeout = backgroundFadeout,
-      randomFactor = globalRandomInfluence
-    )
-
-    animateDropletLayers(
-      maxDuration = dropletsMaxDuration,
-      spawnSize = dropletsSpawnsize,
-      endsizeMin = dropletsEndsizeMin,
-      endsizeMax = dropletsEndsizeMax,
-      fadeout = dropletsFadeout,
-      randomFactor = globalRandomInfluence
-    )
-  }
-
-
   //<editor-fold desc="Constructing views (background layers, droplet layers, oneshot and front drawable)">
   private fun constructChildViews() {
     constructBackgroundLayers(layerCount = backgroundLayersCount)
@@ -383,7 +349,21 @@ open class AnimatedDropletWidget : FrameLayout {
   }
   //</editor-fold>
 
+  //<editor-fold desc="Attaching layers to this view as children">
+  private fun attachChildViews() {
+    addViews(circularBackgroundLayers)
+    addViews(circularDropletsLayers)
+    oneShotDropletView?.let(this::addView)
+    drawableView?.let(this::addView)
+  }
+  //</editor-fold>
+
   //<editor-fold desc="Constructing Drawable (mDrawable) for background and droplet layers">
+  private fun constructDrawables() {
+    setDrawableForBackgroundLayers(measuredWidth, measuredHeight)
+    setDrawableForDropletLayers(measuredWidth, measuredHeight)
+  }
+
   private fun setDrawableForBackgroundLayers(width: Int, height: Int) {
     circularBackgroundLayers.forEach { layer ->
       layer as ImageView
@@ -402,11 +382,46 @@ open class AnimatedDropletWidget : FrameLayout {
       layer.setImageDrawable(createCircularDropletDrawable(width, height, dropletsThickness, globalColour))
     }
   }
+
+  private fun createCircularBackgroundDrawable(width: Int, height: Int, @ColorRes colourRes: ResourceId) =
+    ShapeDrawable(OvalShape()).apply {
+      this.intrinsicHeight = height - DRAWABLE_BACKGROUND_INTERNAL_MARGIN.toPx(context)
+      this.intrinsicWidth = width - DRAWABLE_BACKGROUND_INTERNAL_MARGIN.toPx(context)
+      this.paint.style = FILL
+      this.paint.color = resources.getColor(colourRes)
+    }
+
+  private fun createCircularDropletDrawable(width: Int, height: Int,
+    strokeThickness: Float, @ColorRes colourRes: ResourceId) = ShapeDrawable(OvalShape()).apply {
+    this.intrinsicHeight = width - DRAWABLE_DROPLET_INTERNAL_MARGIN.toPx(context) - strokeThickness.toInt()
+    this.intrinsicWidth = height - DRAWABLE_DROPLET_INTERNAL_MARGIN.toPx(context) - strokeThickness.toInt()
+    this.paint.strokeWidth = strokeThickness
+    this.paint.style = STROKE
+    this.paint.color = resources.getColor(colourRes)
+  }
   //</editor-fold>
 
+  //<editor-fold desc="Construct animations for each children">
+  private fun constructAnimations() {
+    constructBackgroundLayersAnimations(
+      maxDuration = backgroundMaxDuration,
+      endsizeMin = backgroundEndsizeMin,
+      endsizeMax = backgroundEndsizeMax,
+      fadeout = backgroundFadeout,
+      randomFactor = globalRandomInfluence
+    )
 
-  //<editor-fold desc="Animating layers">
-  private fun animateBackgroundLayers(maxDuration: Millis, endsizeMin: Percentage, endsizeMax: Percentage,
+    constructDropletLayersAnimations(
+      maxDuration = dropletsMaxDuration,
+      spawnSize = dropletsSpawnsize,
+      endsizeMin = dropletsEndsizeMin,
+      endsizeMax = dropletsEndsizeMax,
+      fadeout = dropletsFadeout,
+      randomFactor = globalRandomInfluence
+    )
+  }
+
+  private fun constructBackgroundLayersAnimations(maxDuration: Millis, endsizeMin: Percentage, endsizeMax: Percentage,
     fadeout: Factor, randomFactor: Float) {
     //todo: distribution and random is not used
     val minDuration = (0.60f * maxDuration).toLong()
@@ -432,7 +447,7 @@ open class AnimatedDropletWidget : FrameLayout {
     }
   }
 
-  private fun animateDropletLayers(maxDuration: Millis, spawnSize: Percentage, endsizeMin: Percentage,
+  private fun constructDropletLayersAnimations(maxDuration: Millis, spawnSize: Percentage, endsizeMin: Percentage,
     endsizeMax: Percentage, fadeout: Factor, randomFactor: Float) {
     //todo: distribution and random is not used
     val minDuration = (0.66f * maxDuration).toLong()
@@ -453,159 +468,32 @@ open class AnimatedDropletWidget : FrameLayout {
   private fun animateDropletOneshot() {}
   //</editor-fold>
 
-
-  private fun addViews(children: List<View>) = children.forEach(this::addView)
-
-  override fun addView(child: View?) {
-    super.addView(child)
+  //<editor-fold desc="Start animations on each children">
+  private fun startAnimations() {
+    startBackgroundLayersAnimations()
+    startDropletLayersAnimations()
   }
 
-  private fun createCircularBackgroundDrawable(width: Int, height: Int, @ColorRes colourRes: ResourceId) =
-    ShapeDrawable(OvalShape()).apply {
-      this.intrinsicHeight = this@AnimatedDropletWidget.height - DRAWABLE_BACKGROUND_INTERNAL_MARGIN.toPx(context)
-      this.intrinsicWidth = this@AnimatedDropletWidget.width - DRAWABLE_BACKGROUND_INTERNAL_MARGIN.toPx(context)
-      this.paint.style = FILL
-      this.paint.color = resources.getColor(colourRes)
-    }
-
-  private fun createCircularDropletDrawable(width: Int, height: Int,
-    strokeThickness: Float, @ColorRes colourRes: ResourceId) = ShapeDrawable(OvalShape()).apply {
-    this.intrinsicHeight = width - DRAWABLE_DROPLET_INTERNAL_MARGIN.toPx(context) - strokeThickness.toInt()
-    this.intrinsicWidth = height - DRAWABLE_DROPLET_INTERNAL_MARGIN.toPx(context) - strokeThickness.toInt()
-    this.paint.strokeWidth = strokeThickness
-    this.paint.style = STROKE
-    this.paint.color = resources.getColor(colourRes)
+  private fun startBackgroundLayersAnimations() {
+    circularBackgroundLayers.forEach { animation?.start() }
   }
 
-
-//  //<editor-fold desc="Creating layers">
-////
-////  private fun createCircularDropletsLayers(layerCount: Int, @ColorRes colourRes: ResourceId,
-////    colourDistribution: Float, maxDuration: Millis, durationDistribution: Factor,
-////    spawnSize: Percentage, endSizeMin: Percentage, endSizeMax: Percentage, fadeout: Factor,
-////    thickness: Float, thicknessDistribution: Factor, interpolator: WidgetInterpolator,
-////    randomFactor: Float, tag: String = TAG_DROPLET_VAL) {
-////    //todo: figure out distribution factors
-////    //todo: randomFactor not used
-////    //todo: interpolator not used
-////    Timber.d(
-////
-////      "createCircularDropletsLayers, layerCount: $layerCount, colourRes: $colourRes, " + "colourDistribution: $colourDistribution, maxDuration: $maxDuration, durationDistribution: $durationDistribution, " + "spawnSize: $spawnSize, endSizeMin: $endSizeMin, endSizeMax: $endSizeMax, fadeout: $fadeout, thickness: $thickness, " + "thicknessDistribution: $thicknessDistribution, interpolator: $interpolator, randomFactor: $randomFactor, tag: $tag"
-////    )
-////
-////
-////    (0 until layerCount).mapTo(circularDropletsLayers) { layerIndex ->
-////      createCircularDropletView(thickness, colourRes, "$tag[$layerIndex]", randomFactor)
-////    }
-////    //todo: start animation should be as a separate function in onLayoutFirstMeasurementApplied
-////    addViews(children = circularDropletsLayers, childApply = { child, index ->
-////      val layerDependency = index / layerCount.toFloat()
-////      animateCircularDroplet(
-////        child,
-////        maxDuration,
-////        lerp(0L, maxDuration, layerDependency),
-////        lerp(0L, maxDuration, layerDependency),
-////        spawnSize,
-////        lerp(endSizeMin, endSizeMax, layerDependency),
-////        randomFactor
-////      )
-////    })
-////  }
-//
-////
-////  private fun createCircularDropletBackgroundLayers(layerCount: Int, @ColorRes colorRes: Int,
-////    colourDistribution: Float, duration: Millis, randomFactor: Float,
-////    tag: String = TAG_BACKGROUND_VAL) {
-////    Timber.d( "createCircularDropletBackgroundLayers, layerCount: $layerCount")
-//////    (0 until layerCount).mapTo(circularBackgroundLayers) {
-//////      createCircularBackgroundView(
-//////        colourRes = ColorUtils.blendARGB(
-//////          resources.getColor(colorRes), Color.TRANSPARENT, it / layerCount.toFloat()
-//////        ), alpha = 100, tag = "$tag[$it]"
-//////      ) //todo: colours distribution
-//////    }
-////
-////    addViews(circularBackgroundLayers, { child, index ->
-////      animateCircularBackground(
-////        targetView = child, startTime = lerp(
-////          0, duration, index / layerCount.toFloat().randomVariation(random, randomFactor)
-////        ), //todo apply index
-////        duration = duration, //todo apply index
-////        randomFactor = randomFactor
-////      )
-////    })
-////  }
-//
-//
-//  private fun createFrontDrawable(alpha: Percentage, size: Int, @DrawableRes src: Int,
-//    tag: String = TAG_DRAWABLE_VAL) {
-//    Timber.d( "createFrontDrawable, alpha: $alpha, size: $size, src: $src")
-//    if (alpha != 0 && size != 0 && src != android.R.color.transparent) {
-//      drawableView =
-//          createFrontDrawableView(alpha = alpha, size = size, drawableRes = src, tag = tag)
-//      addView(drawableView)
-//    }
-//  }
-//  //</editor-fold>
-//
-//  //<editor-fold desc="Creating view layers (droplets and backgrounds)">
-//
-//  private fun createCircularDropletView(thickness: Float, @ColorRes colourRes: ResourceId,
-//    tag: String, randomFactor: Float) = createImageViewWithDrawable(
-//    context, createCircularDropletDrawable(thickness, colourRes)
-//  ).apply {
-//    this.tag = tag
-//    val size = this@AnimatedDropletWidget.size
-//    this.setSize(size)
-//  }.also {
-//      Timber.d(
-//
-//        "createCircularDropletView, thickness: $thickness, " + "colourRes: ${colourRes.toResourceEntryName(
-//          context
-//        )}, view: ${it.asString()}"
-//      )
-//    }
-//
-//
-//  private fun createCircularBackgroundView(@ColorInt colourRes: ResourceId, alpha: Percentage = 100,
-//    tag: String) =
-//    createImageViewWithDrawable(context, createCircularBackgroundDrawable(colourRes)).apply {
-//      this.tag = tag
-//      this.setSize(this@AnimatedDropletWidget.layoutParams.size)
-//    }.also {
-//        //        this.alpha = (alpha/100f).clamp(1f, 0f)
-//        Timber.d(
-//
-//          "createCircularBackgroundView, alpha: $alpha, " + "colourRes: $colourRes, view: ${it.asString()}"
-//        )
-//      }
+  private fun startDropletLayersAnimations() {
+    circularDropletsLayers.forEach { animation?.start() }
+  }
+  //</editor-fold
 
 
-  private fun createFrontDrawableView(alpha: Percentage, size: Percentage, @DrawableRes drawableRes: ResourceId,
-    tag: String) = createImageViewWithDrawable(context, drawableRes.let { resources.getDrawable(drawableRes) }).apply {
-    this.tag = tag
-//        this.setTag(TAG_INDEX, TAG_DRAWABLE_VAL)
-    this.alpha = alpha / 100f
-//      val tmp = this@AnimatedDropletWidget.layoutParams.width
-//      this.setSize(
-//        (this@AnimatedDropletWidget.layoutParams.width * size / 100f).toInt(),
-//        (this@AnimatedDropletWidget.layoutParams.height * size / 100f).toInt()
-//      )
-//      this.center(
-//        this@AnimatedDropletWidget.layoutParams.width,
-//        this@AnimatedDropletWidget.layoutParams.height
-//      )
-  }.also {
-      Timber.d(
 
-        "createFrontDrawableView, drawableRes: ${drawableRes.toResourceEntryName(context)}" + "alpha: $alpha, size: $size, view: ${it.asString()}"
-      )
-    }
-  //</editor-fold>
 
-  //<editor-fold desc="Animating views">
 
-  //  //todo: add endSize to this
+
+
+
+
+
+
+  //<editor-fold desc="AnimationSet construction wrappers">
   private fun animateCircularBackground(targetView: View, startTime: Millis, repeatDelay: Millis, duration: Millis,
     endSize: Percentage = 100, fadeout: Factor = 1f) {
     targetView.show()
@@ -635,9 +523,8 @@ open class AnimatedDropletWidget : FrameLayout {
         )
       )
       set.attach(targetView)
-    }.start()
+    }
   }
-
 
   private fun animateCircularDroplet(targetView: View, duration: Millis, startTime: Millis, repeatDelay: Millis,
     spawnSize: Percentage, endSize: Percentage) {
@@ -669,61 +556,11 @@ open class AnimatedDropletWidget : FrameLayout {
         )
       )
       set.attach(targetView)
-    }.start()
+    }
   }
-//
-////  
-////  private fun animateCircularDroplet(targetView: View, layerIndex: Int, layerCount: Int, layerDependency: Float, randomFactor: Float) {
-////    val startTime = random.nextInt(ANIMATION_RANDOM_START_TIME_BOUND_MILLIS.toInt()).toLong()
-////    val repeatDelayAddition = random.nextInt(ANIMATION_RANDOM_REPEAT_DELAY_BOUND_MILLIS.toInt()).toLong()
-////    val layerValuesMultiplier = layerIndex / layerCount * layerDependency
-////    val inverseLerp = inverseLerp(0, layerCount, layerIndex.toFloat())
-//////    Timber.d(
-//////      
-//////      "animateCircularDroplet, layerIndex: $layerIndex, layerCount: $layerCount, layerDependency: $layerDependency, inverseLerp: $inverseLerp, layerValuesMultiplier: $layerValuesMultiplier"
-//////    )
-//////    targetView.show()
-////    AnimationSet(false).also { set ->
-////      set.fillAfter = true
-////      set.isFillEnabled = true
-////      set.addAnimation(
-////        createScalingAnimation(
-////          parentContainer = this,
-////          duration = lerpLong(first = BASE_ANIMATION_LENGTH_MIN_MILLIS, second = BASE_ANIMATION_LENGTH_MILLIS, factor = inverseLerp),
-////          startTime = startTime,
-////          repeatDelay = BASE_ANIMATION_REPEAT_DELAY_MILLIS + repeatDelayAddition,
-////          xyStart = 0.00f,
-////          xyEnd = lerp(0.70f, 1.00f, inverseLerp),
-////          interpolator = AnticipateOvershootInterpolator(lerp(1.33f, 0.25f, inverseLerp)),
-////          timeCutoff = lerp(0.8f, 0.98f, inverseLerp)
-////        )
-////      )
-////      set.addAnimation(
-////        createFadeoutAnimation(
-////          parentContainer = this,
-////          duration = lerp(
-////            first = BASE_ANIMATION_LENGTH_MIN_MILLIS,
-////            second = BASE_ANIMATION_LENGTH_MILLIS,
-////            factor = inverseLerp(0, layerCount, layerIndex.toFloat())
-////          ).toLong(),
-////          repeatDelay = BASE_ANIMATION_REPEAT_DELAY_MILLIS + repeatDelayAddition,
-////          startTime = startTime,
-//////              alphaStart = lerp(0.15f, 0.55f, inverseLerp),
-////          alphaStart = lerp(0.50f, 1.00f, inverseLerp),
-////          alphaEnd = 0.00f,
-////          interpolator = AccelerateInterpolator(lerp(1.10f, 0.85f, inverseLerp)),
-////          timeCutoff = lerp(0.90f, 0.97f, inverseLerp)
-////        )
-////      )
-////      set.attach(targetView)
-////    }.start()
-////  }
-//
-//
-//  //</editor-fold>
-//
-//  //<editor-fold desc="Animations builders">
+  //</editor-fold>
 
+  //<editor-fold desc="Creating animations primitives (scaling and alpha fadeout)">
   private fun createScalingAnimation(parentContainer: View, duration: Millis, startTime: Millis, repeatDelay: Millis,
     xyStart: Float, xyEnd: Float, interpolator: Interpolator, timeCutoff: Float = 1.0f, oneShot: Boolean = false) =
     ScaleAnimation(
@@ -738,9 +575,6 @@ open class AnimatedDropletWidget : FrameLayout {
         animation.startOffset = repeatDelay //todo: should it be here?
       })
     }
-
-  //
-//
 
   private fun createFadeoutAnimation(parentContainer: View, duration: Millis, startTime: Millis, repeatDelay: Millis,
     alphaStart: Float, alphaEnd: Float, interpolator: Interpolator, timeCutoff: Float, oneShot: Boolean = false) =
@@ -757,76 +591,14 @@ open class AnimatedDropletWidget : FrameLayout {
         animation.startOffset = repeatDelay
       })
     }
+  //</editor-fold>
 
-  //  //</editor-fold>
-//
-//  fun performOneShotAnimation() {
-//    Timber.d( "performOneShotAnimation")
-//    oneShotDropletView?.let {
-//      this.show()
-//      AnimationSet(false).also { set ->
-//        set.fillAfter = true
-//        set.isFillEnabled = true
-//        set.addAnimation(
-//          createScalingAnimation(
-//            parentContainer = this,
-//            duration = BASE_ANIMATION_LENGTH_MILLIS,
-//            startTime = 0,
-//            repeatDelay = 0,
-//            xyStart = 0.00f,
-//            xyEnd = 1.00f,
-//            interpolator = AnticipateOvershootInterpolator(0.80f),
-//            timeCutoff = 1.00f,
-//            oneShot = true
-//          )
-//        )
-//        set.addAnimation(
-//          createFadeoutAnimation(
-//            parentContainer = this,
-//            duration = BASE_ANIMATION_LENGTH_MILLIS,
-//            repeatDelay = 0,
-//            startTime = 0,
-//            alphaStart = 1.00f,
-//            alphaEnd = 0.00f,
-//            interpolator = AccelerateInterpolator(0.5f),
-//            timeCutoff = 1.0f,
-//            oneShot = true
-//          )
-//        )
-//        set.attach(this)
-//      }.start()
-//    }
-//  }
-//
-////  
-////  private fun addViews(children: List<View>, childApply: (View, Int) -> (Unit)) {
-////    Timber.d(
-////      
-////      "addViews, children.count: ${children.size}, children: ${children.map { it.asString() }}"
-////    )
-////    children.forEachIndexed { index, child ->
-////      this@AnimatedDropletWidget.addView(child)
-////      childApply.invoke(child, index)
-////    }
-////    Timber.d(
-////       "addViews, this.children: ${getChildren().map { it.asString() }}"
-////    )
-////    Timber.d( "[parent]:\n${this@AnimatedDropletWidget.complexString}")
-////    getChildren().forEachIndexed { index, view ->
-////      Timber.d( "[$index]\n${view.complexString}")
-////    }
-////  }
-//
-//  private fun createInterpolator(randomFactor: Float) =
-//    if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) createInterpolatorApiLollipop(randomFactor)
-//    else createInterpolatorPreApiLollipop()
-//
-//  @RequiresApi(VERSION_CODES.LOLLIPOP)
-//  private fun createInterpolatorApiLollipop(randomFactor: Float) =
-//    PathInterpolator(generateDropletBackgroundPath(random, randomFactor))
-//
-//  private fun createInterpolatorPreApiLollipop() = AccelerateDecelerateInterpolator()
-//
+
+
+
+
+
+
   //proven that this feels good on the ui with serious laboratory testing. true story
   private fun generateDropletBackgroundPath(random: Random, randomFactor: Float = 0.005f) = Path().apply {
     moveTo(0.000f, 0.000f)
@@ -839,6 +611,11 @@ open class AnimatedDropletWidget : FrameLayout {
     quadTo(0.965f, 0.925f, 1.000f, 1.000f)
   }
 
+  private fun addViews(children: List<View>) = children.forEach(this::addView)
+
+  override fun addView(child: View?) {
+    super.addView(child)
+  }
 
   private fun getPaddingLeftWithForeground() = paddingLeft + (foreground?.run { this.padding.left } ?: 0)
 
