@@ -20,7 +20,7 @@ class CutoffInterpolator(
   private val lerpLimit = (inputRangeMax - inputRangeMin) + (inputRangeMax - cutoff)
 
   override fun getInterpolation(input: Float): Float {
-    val cutoffInput = lerp(0f, lerpLimit, input).clamp(inputRangeMax, inputRangeMin)
+    val cutoffInput = lerp(0f, lerpLimit, input).clamp(inputRangeMin, inputRangeMax)
     return sourceInterpolator?.getInterpolation(cutoffInput) ?: cutoffInput
   }
 

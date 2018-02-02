@@ -16,13 +16,14 @@
       <enum name="irregular" value="4" />
     </attr>
 
-    <attr format="integer" name="droplet_count" />
+    <attr format="integer" name="droplets_layers_count" />
     <attr format="integer" name="background_layers_count" />
     <attr format="integer" name="oneshot_count" />
 
     <attr format="float" name="global_random_influence" />
     <attr format="integer" name="global_max_duration_ms" />
     <attr format="reference" name="global_colour" />
+    <!--//TODO: global fadeout-->
     <!--<attr format="float" name="global_colour_distribution" />-->
     <!--<attr format="enum" name="global_interpolator">-->
       <!--<enum name="predefined" value="0" />-->
@@ -53,6 +54,7 @@
     <attr format="integer" name="background_max_duration" /> <!-- fallback to global_max_duration if not set-->
     <attr format="integer" name="background_endsize_max" /> <!-- fallback to droplet_endsize_max if not set-->
     <attr format="reference" name="background_colour" /> <!-- fallback to global_colour if not set-->
+    <attr format="float" name="background_fadeout" />
     <!--<attr format="float" name="background_colour_distibution" /> &lt;!&ndash; fallback to global_colour if not set&ndash;&gt;-->
     <!--<attr format="enum" name="background_interpolator"> &lt;!&ndash; fallback to global_interpolator if not set&ndash;&gt;-->
       <!--<enum name="predefined" value="0" />-->

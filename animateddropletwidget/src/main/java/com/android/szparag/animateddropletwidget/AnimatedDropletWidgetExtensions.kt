@@ -31,41 +31,151 @@ typealias Px = Int
 private val animationListenerCallbackStub: (Animation?) -> Unit = {}
 
 /**
- * Min - inclusive
- * Max - inclusive
+ * Draws random Float between min and max range (both are inclusive!).
+ * @param min lowest bound of randomization, inclusive. Floats will not be drawn below that value.
+ * @param max highest bound of randomization, inclusive. Floats will not be drawn above that value.
+ *
+ * @return random Float between specified input range.
  */
 fun Random.nextFloat(min: Float, max: Float) = nextFloat() * (max - min) + min
 
+/**
+ * Draws random Double between min and max range (both are inclusive!).
+ * @param min lowest bound of randomization, inclusive. Doubles will not be drawn below that value.
+ * @param max highest bound of randomization, inclusive. Doubles will not be drawn above that value.
+ *
+ * @return random Double between specified input range.
+ */
 fun Random.nextDouble(min: Double, max: Double) = nextDouble() * (max - min) + min
 
+/**
+ * Draws random Int between min and max range (both are inclusive!).
+ * @param min lowest bound of randomization, inclusive. Ints will not be drawn below that value.
+ * @param max highest bound of randomization, inclusive. Ints will not be drawn above that value.
+ *
+ * @return random Int between specified input range.
+ */
 fun Random.nextInt(min: Int, max: Int) = (nextFloat() * (max - min) + min).roundToInt()
 
+/**
+ * Draws random Long between min and max range (both are inclusive!).
+ * @param min lowest bound of randomization, inclusive. Longs will not be drawn below that value.
+ * @param max highest bound of randomization, inclusive. Longs will not be drawn above that value.
+ *
+ * @return random Long between specified input range.
+ */
 fun Random.nextLong(min: Long, max: Long) = (nextFloat() * (max - min) + min).roundToLong()
 
+/**
+ * Introduces random variation of a given number by a given factor.
+ * Factor is understood by being both highest and lowest bound for this draw.
+ *
+ * eg. 10f.randomVariation(random, 1f) will generate random number in inclusive range between <(10f-1f);(10f+1f)>
+ *
+ * @receiver input / output. Base of the draw range.
+ * @param random pseudo-random number generator
+ * @see Random
+ * @param factor upper and lower bound of drawing
+ *
+ */
 fun Float.randomVariation(random: Random, factor: Float) =
   if (factor != 0f) random.nextFloat(this - this * factor, this + this * factor) else this
 
+/**
+ * Introduces random variation of a given number by a given factor.
+ * Factor is understood by being both highest and lowest bound for this draw.
+ *
+ * eg. 10f.randomVariation(random, 1f) will generate random number in inclusive range between <(10f-1f);(10f+1f)>
+ *
+ * @receiver input / output. Base of the draw range.
+ * @param random pseudo-random number generator
+ * @see Random
+ * @param factor upper and lower bound of drawing
+ *
+ */
 fun Double.randomVariation(random: Random, factor: Float) =
   if (factor != 0f) random.nextDouble(this - this * factor, this + this * factor) else this
 
+/**
+ * Introduces random variation of a given number by a given factor.
+ * Factor is understood by being both highest and lowest bound for this draw.
+ *
+ * eg. 10f.randomVariation(random, 1f) will generate random number in inclusive range between <(10f-1f);(10f+1f)>
+ *
+ * @receiver input / output. Base of the draw range.
+ * @param random pseudo-random number generator
+ * @see Random
+ * @param factor upper and lower bound of drawing
+ *
+ */
 fun Int.randomVariation(random: Random, factor: Float) =
   if (factor != 0f) random.nextInt((this - this * factor).toInt(), (this + this * factor).toInt()) else this
 
+/**
+ * Introduces random variation of a given number by a given factor.
+ * Factor is understood by being both highest and lowest bound for this draw.
+ *
+ * eg. 10f.randomVariation(random, 1f) will generate random number in inclusive range between <(10f-1f);(10f+1f)>
+ *
+ * @receiver input / output. Base of the draw range.
+ * @param random pseudo-random number generator
+ * @see Random
+ * @param factor upper and lower bound of drawing
+ *
+ */
 fun Long.randomVariation(random: Random, factor: Float) =
   if (factor != 0f) random.nextLong((this - this * factor).toLong(), (this + this * factor).toLong()) else this
 
-//todo: inverse params
-fun Float.clamp(max: Float, min: Float) = this.coerceAtLeast(min).coerceAtMost(max)
+/**
+ * Clamps value between range between min and max input parameters.
+ * Range is inclusive from both sides.
+ */
+fun Float.clamp(min: Float, max: Float) = this.coerceAtLeast(min).coerceAtMost(max)
 
+/**
+ * Lerp - Linear Interpolation
+ * Produces linearly interpolated value between first and second parameter by factor of factor.
+ *
+ * @param first Lower range of interpolation.
+ * @param second Upper range of interpolation.
+ * @param factor Interpolation factor.
+ * @return value of linear interpolation.
+ */
 fun lerp(first: Float, second: Float, factor: Float) = first + factor * (second - first)
 
+/**
+ * Lerp - Linear Interpolation
+ * Produces linearly interpolated value between first and second parameter by factor of factor.
+ *
+ * @param first Lower range of interpolation.
+ * @param second Upper range of interpolation.
+ * @param factor Interpolation factor.
+ * @return value of linear interpolation.
+ */
 fun lerp(first: Long, second: Long, factor: Float) = (first + factor * (second - first)).toLong()
 
+/**
+ * Lerp - Linear Interpolation
+ * Produces linearly interpolated value between first and second parameter by factor of factor.
+ *
+ * @param first Lower range of interpolation.
+ * @param second Upper range of interpolation.
+ * @param factor Interpolation factor.
+ * @return value of linear interpolation.
+ */
 fun lerp(first: Int, second: Int, factor: Float) = (first + factor * (second - first)).toInt()
 
-fun inverseLerp(first: Int, second: Int, actual: Float) = (actual.clamp(
-  Math.max(first, second).toFloat(), Math.min(first, second).toFloat()
-) - first) / (second - first)
+/**
+ * inverseLerp - Inverse Linear Interpolation
+ * Produces factor of linear interpolation, given bounds between first and second parameter and actual value.
+ *
+ * @param first Lower range of interpolation.
+ * @param second Upper range of interpolation.
+ * @param actual interpolation result.
+ * @return factor of linear interpolation.
+ */
+fun inverseLerp(first: Int, second: Int, actual: Float) =
+  (actual.clamp(Math.min(first, second).toFloat(), Math.max(first, second).toFloat()) - first) / (second - first)
 
 
 fun Widget.hide() {

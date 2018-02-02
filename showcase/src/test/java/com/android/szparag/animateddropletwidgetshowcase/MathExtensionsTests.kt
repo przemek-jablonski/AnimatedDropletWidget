@@ -377,9 +377,9 @@ class MathExtensionsTest {
     var input: Float
     repeat {
       input = random.nextFloat(min - 10f, min - 0.01f)
-      assertThat(input.clamp(max, min)).isEqualTo(min)
+      assertThat(input.clamp(min, max)).isEqualTo(min)
       input = random.nextFloat(max + 0.01f, max + 10f)
-      assertThat(input.clamp(max, min)).isEqualTo(max)
+      assertThat(input.clamp(min, max)).isEqualTo(max)
     }
   }
 
@@ -389,7 +389,7 @@ class MathExtensionsTest {
     var input: Float
     repeat {
       input = random.nextFloat(min, max)
-      assertThat(input.clamp(max, min)).isBetween(min, max)
+      assertThat(input.clamp(min, max)).isBetween(min, max)
     }
   }
 
@@ -398,17 +398,17 @@ class MathExtensionsTest {
     val max = 10f
     var input: Float
     input = max
-    assertThat(input.clamp(max, min)).isEqualTo(max)
+    assertThat(input.clamp(min, max)).isEqualTo(max)
     input = min
-    assertThat(input.clamp(max, min)).isEqualTo(min)
+    assertThat(input.clamp(min, max)).isEqualTo(min)
   }
 
   @Test fun `clamp() called with in-bounds values when min = max should return input`() {
     val min = 0f
     val max = 0f
     val input = 0f
-    assertThat(input.clamp(max, min)).isEqualTo(min)
-    assertThat(input.clamp(max, min)).isEqualTo(max)
+    assertThat(input.clamp(min, max)).isEqualTo(min)
+    assertThat(input.clamp(min, max)).isEqualTo(max)
   }
   //</editor-fold>
 
