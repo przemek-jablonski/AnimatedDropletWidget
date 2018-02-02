@@ -24,14 +24,14 @@
     <attr format="integer" name="global_max_duration_ms" />
     <attr format="reference" name="global_colour" />
     <!--<attr format="float" name="global_colour_distribution" />-->
-    <attr format="enum" name="global_interpolator">
-      <enum name="predefined" value="0" />
-      <enum name="accelerate" value="1" />
-      <enum name="decelerate" value="2" />
-      <enum name="accelerate_decelerate" value="3" />
-      <enum name="bounce" value="4" />
-      <enum name="overshoot" value="5" />
-    </attr>
+    <!--<attr format="enum" name="global_interpolator">-->
+      <!--<enum name="predefined" value="0" />-->
+      <!--<enum name="accelerate" value="1" />-->
+      <!--<enum name="decelerate" value="2" />-->
+      <!--<enum name="accelerate_decelerate" value="3" />-->
+      <!--<enum name="bounce" value="4" />-->
+      <!--<enum name="overshoot" value="5" />-->
+    <!--</attr>-->
 
     <attr format="integer" name="droplets_max_duration" />
     <!--<attr format="float" name="droplets_max_duration_distribution" />-->
@@ -41,38 +41,38 @@
     <attr format="float" name="droplets_fadeout" />
     <attr format="float" name="droplets_thickness" />
     <!--<attr format="float" name="droplets_thickness_distribution" />-->
-    <attr format="enum" name="droplets_interpolator"> <!-- fallback to global_interpolator if not set-->
-      <enum name="predefined" value="0" />
-      <enum name="accelerate" value="1" />
-      <enum name="decelerate" value="2" />
-      <enum name="accelerate_decelerate" value="3" />
-      <enum name="bounce" value="4" />
-      <enum name="overshoot" value="5" />
-    </attr>
+    <!--<attr format="enum" name="droplets_interpolator"> &lt;!&ndash; fallback to global_interpolator if not set&ndash;&gt;-->
+      <!--<enum name="predefined" value="0" />-->
+      <!--<enum name="accelerate" value="1" />-->
+      <!--<enum name="decelerate" value="2" />-->
+      <!--<enum name="accelerate_decelerate" value="3" />-->
+      <!--<enum name="bounce" value="4" />-->
+      <!--<enum name="overshoot" value="5" />-->
+    <!--</attr>-->
 
     <attr format="integer" name="background_max_duration" /> <!-- fallback to global_max_duration if not set-->
     <attr format="integer" name="background_endsize_max" /> <!-- fallback to droplet_endsize_max if not set-->
     <attr format="reference" name="background_colour" /> <!-- fallback to global_colour if not set-->
     <!--<attr format="float" name="background_colour_distibution" /> &lt;!&ndash; fallback to global_colour if not set&ndash;&gt;-->
-    <attr format="enum" name="background_interpolator"> <!-- fallback to global_interpolator if not set-->
-      <enum name="predefined" value="0" />
-      <enum name="accelerate" value="1" />
-      <enum name="decelerate" value="2" />
-      <enum name="accelerate_decelerate" value="3" />
-      <enum name="bounce" value="4" />
-      <enum name="overshoot" value="5" />
-    </attr>
+    <!--<attr format="enum" name="background_interpolator"> &lt;!&ndash; fallback to global_interpolator if not set&ndash;&gt;-->
+      <!--<enum name="predefined" value="0" />-->
+      <!--<enum name="accelerate" value="1" />-->
+      <!--<enum name="decelerate" value="2" />-->
+      <!--<enum name="accelerate_decelerate" value="3" />-->
+      <!--<enum name="bounce" value="4" />-->
+      <!--<enum name="overshoot" value="5" />-->
+    <!--</attr>-->
 
 
     <attr format="reference" name="oneshot_colour" />
-    <attr format="enum" name="oneshot_interpolator"> <!-- fallback to global_interpolator if not set-->
-      <enum name="predefined" value="0" />
-      <enum name="accelerate" value="1" />
-      <enum name="decelerate" value="2" />
-      <enum name="accelerate_decelerate" value="3" />
-      <enum name="bounce" value="4" />
-      <enum name="overshoot" value="5" />
-    </attr>
+    <!--<attr format="enum" name="oneshot_interpolator"> &lt;!&ndash; fallback to global_interpolator if not set&ndash;&gt;-->
+      <!--<enum name="predefined" value="0" />-->
+      <!--<enum name="accelerate" value="1" />-->
+      <!--<enum name="decelerate" value="2" />-->
+      <!--<enum name="accelerate_decelerate" value="3" />-->
+      <!--<enum name="bounce" value="4" />-->
+      <!--<enum name="overshoot" value="5" />-->
+    <!--</attr>-->
 
   </declare-styleable>
 

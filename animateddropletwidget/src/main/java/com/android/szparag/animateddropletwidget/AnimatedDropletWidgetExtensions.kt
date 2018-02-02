@@ -17,7 +17,6 @@ import android.view.animation.Animation
 import android.view.animation.Animation.AnimationListener
 import android.view.animation.AnimationSet
 import android.widget.ImageView
-import com.android.szparag.animateddropletwidget.AnimatedDropletWidget.WidgetInterpolator
 import com.android.szparag.animateddropletwidget.AnimatedDropletWidget.WidgetPreset
 import java.util.*
 import kotlin.math.roundToInt
@@ -120,11 +119,11 @@ fun WidgetPreset.fromInt(ordinal: Int, default: WidgetPreset = WidgetPreset.valu
   return default
 }
 
-fun WidgetInterpolator.fromInt(ordinal: Int,
-  default: WidgetInterpolator = WidgetInterpolator.values()[0]): WidgetInterpolator {
-  WidgetInterpolator.values().filter { it.ordinal == ordinal }.forEach { return it }
-  return default
-}
+//fun WidgetInterpolator.fromInt(ordinal: Int,
+//  default: WidgetInterpolator = WidgetInterpolator.values()[0]): WidgetInterpolator {
+//  WidgetInterpolator.values().filter { it.ordinal == ordinal }.forEach { return it }
+//  return default
+//}
 
 fun TypedArray.getInt(@StyleableRes src: Int, defaultVal: Int) = getInt(src, defaultVal)
 //    .also { Log.d("AnimatedDropletWidget", getType(src)) }
