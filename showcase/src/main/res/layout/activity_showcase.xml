@@ -4,7 +4,8 @@
   xmlns:tools="http://schemas.android.com/tools"
   android:layout_width="match_parent"
   android:layout_height="match_parent"
-  tools:context="com.android.szparag.animateddropletwidgetshowcase.ShowcaseActivity">
+  tools:context="com.android.szparag.animateddropletwidgetshowcase.ShowcaseActivity"
+  android:background="@drawable/background_test">
 
   <com.android.szparag.animateddropletwidget.AnimatedDropletWidget
     android:layout_width="287dp"
@@ -19,6 +20,7 @@
     app:layout_constraintTop_toTopOf="parent"
     app:drawable_alpha="30"
     app:drawable_size="50"
+    app:drawable_src="@drawable/avatar_businessman_stock"
     app:background_layers_count="0"
     app:background_fadeout="1"
     app:background_max_duration="5000"
@@ -42,6 +44,7 @@
     app:layout_constraintTop_toTopOf="parent"
     app:drawable_alpha="80"
     app:drawable_size="70"
+    app:drawable_src="@drawable/avatar_businessman_stock"
     app:background_layers_count="0"
     app:background_fadeout="1"
     app:background_max_duration="5000"
@@ -65,6 +68,7 @@
     app:layout_constraintTop_toTopOf="parent"
     app:drawable_alpha="100"
     app:drawable_size="80"
+    app:drawable_src="@drawable/avatar_businessman_stock"
     app:background_layers_count="0"
     app:background_fadeout="1"
     app:background_max_duration="10000"
