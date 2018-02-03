@@ -9,7 +9,6 @@ import android.graphics.Paint.Style.STROKE
 import android.graphics.Path
 import android.graphics.drawable.ShapeDrawable
 import android.graphics.drawable.shapes.OvalShape
-import android.support.annotation.CallSuper
 import android.support.annotation.ColorRes
 import android.support.annotation.DrawableRes
 import android.support.v4.view.animation.FastOutLinearInInterpolator
@@ -37,41 +36,41 @@ typealias Factor = Float
 private const val ATTRS_DROPLET_COUNT = 5
 private const val ATTRS_BACKGROUND_LAYERS_COUNT = 2
 private const val ATTRS_ONESHOT_COUNT = 1
-private const val ATTRS_GLOBAL_RANDOM_INFLUENCE = 1.00F
+private const val ATTRS_GLOBAL_RANDOM_INFLUENCE: Factor = 1.00F
 private const val ATTRS_GLOBAL_MAX_DURATION: Millis = 5000 //todo: BASE_ANIMATION_LENGTH_MILLIS?
-private const val ATTRS_GLOBAL_COLOUR = color.holo_red_dark
+private const val ATTRS_GLOBAL_COLOUR: ResourceId = color.holo_red_dark
 //</editor-fold>
 
 //<editor-fold desc="Default XML attribute values for drawable layer">
-private const val ATTRS_DRAWABLE = android.R.mipmap.sym_def_app_icon
-private const val ATTRS_DRAWABLE_SIZE = 75
-private const val ATTRS_DRAWABLE_ALPHA = 100
+private const val ATTRS_DRAWABLE: ResourceId = android.R.mipmap.sym_def_app_icon
+private const val ATTRS_DRAWABLE_SIZE: Percentage = 75
+private const val ATTRS_DRAWABLE_ALPHA: Percentage = 100
 //</editor-fold>
 
 //<editor-fold desc="Default XML attribute values for droplets layers">
-private const val ATTRS_DROPLETS_MAX_DURATION = ATTRS_GLOBAL_MAX_DURATION
-private const val ATTRS_DROPLETS_SPAWNSIZE = 0
-private const val ATTRS_DROPLETS_ENDSIZE_MAX = 100
-private const val ATTRS_DROPLETS_ENDSIZE_MIN =
+private const val ATTRS_DROPLETS_MAX_DURATION: Millis = ATTRS_GLOBAL_MAX_DURATION
+private const val ATTRS_DROPLETS_SPAWNSIZE: Percentage = 0
+private const val ATTRS_DROPLETS_ENDSIZE_MAX: Percentage = 100
+private const val ATTRS_DROPLETS_ENDSIZE_MIN: Percentage =
   ATTRS_DRAWABLE_SIZE + (ATTRS_DROPLETS_ENDSIZE_MAX - ATTRS_DROPLETS_ENDSIZE_MAX) / 3 //todo: this 3 as constant
-private const val ATTRS_DROPLETS_FADEOUT = 1.00F
+private const val ATTRS_DROPLETS_FADEOUT: Factor = 1.00F
 private const val ATTRS_DROPLETS_THICKNESS = 5.00F
 //</editor-fold>
 
 //<editor-fold desc="Default XML attribute values for background layers">
-private const val ATTRS_BACKGROUND_MAX_DURATION = ATTRS_GLOBAL_MAX_DURATION
-private const val ATTRS_BACKGROUND_ENDSIZE_MAX = 100
-private const val ATTRS_BACKGROUND_COLOUR = ATTRS_GLOBAL_COLOUR
-private const val ATTRS_BACKGROUND_FADEOUT = 1.00F
+private const val ATTRS_BACKGROUND_MAX_DURATION: Millis = ATTRS_GLOBAL_MAX_DURATION
+private const val ATTRS_BACKGROUND_ENDSIZE_MAX: Percentage = 100
+private const val ATTRS_BACKGROUND_COLOUR: ResourceId = ATTRS_GLOBAL_COLOUR
+private const val ATTRS_BACKGROUND_FADEOUT: Factor = 1.00F
 //</editor-fold>
 
 //<editor-fold desc="Default XML attribute values for One-Shot layers">
-private const val ATTRS_ONESHOT_MAX_DURATION = ATTRS_DROPLETS_MAX_DURATION
-private const val ATTRS_ONESHOT_COLOUR = ATTRS_GLOBAL_COLOUR
+private const val ATTRS_ONESHOT_MAX_DURATION: Millis = ATTRS_DROPLETS_MAX_DURATION
+private const val ATTRS_ONESHOT_COLOUR: ResourceId = ATTRS_GLOBAL_COLOUR
 //</editor-fold>
 
 //<editor-fold desc="Default internal values">
-private const val BASE_ANIMATION_LENGTH_MILLIS = 5000L
+private const val BASE_ANIMATION_LENGTH: Millis = 5000L
 
 private const val DRAWABLES_BASE_INTERNAL_MARGIN: Dp = 4
 private const val DRAWABLE_BACKGROUND_INTERNAL_MARGIN: Dp = DRAWABLES_BASE_INTERNAL_MARGIN
@@ -84,12 +83,12 @@ private const val TAG_DROPLET_VAL = "DROPLET"
 //private const val TAG_ONESHOT_VAL = "ONESHOT"
 private const val TAG_DRAWABLE_VAL = "DRAWABLE"
 
-private const val BACKGROUND_DURATION_BASE_RANDOM_FACTOR = 0.05F
-private const val BACKGROUND_REPEATDELAY_BASE_RANDOM_FACTOR = BACKGROUND_DURATION_BASE_RANDOM_FACTOR
-private const val BACKGROUND_STARTTIME_BASE_RANDOM_FACTOR = BACKGROUND_DURATION_BASE_RANDOM_FACTOR / 4F
-private const val BACKGROUND_ENDSIZE_BASE_RANDOM_FACTOR = 0.05F
+private const val BACKGROUND_DURATION_BASE_RANDOM_FACTOR: Factor = 0.05F
+private const val BACKGROUND_REPEATDELAY_BASE_RANDOM_FACTOR: Factor = BACKGROUND_DURATION_BASE_RANDOM_FACTOR
+private const val BACKGROUND_STARTTIME_BASE_RANDOM_FACTOR: Factor = BACKGROUND_DURATION_BASE_RANDOM_FACTOR / 4F
+private const val BACKGROUND_ENDSIZE_BASE_RANDOM_FACTOR: Factor = 0.05F
 
-private const val BACKGROUND_ENDSIZE_MIN_OVERHEAD : Percentage = 5
+private const val BACKGROUND_ENDSIZE_MIN_OVERHEAD: Percentage = 5
 
 @SuppressLint("BinaryOperationInTimber") //todo: remove timber
 open class AnimatedDropletWidget : FrameLayout {
@@ -160,6 +159,7 @@ open class AnimatedDropletWidget : FrameLayout {
 
   //<editor-fold desc="Custom view Lifecycle callbacks">
   constructor(context: Context) : this(context, null)
+
   constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
   constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
     Timber.plant(Timber.DebugTree())
@@ -367,11 +367,11 @@ open class AnimatedDropletWidget : FrameLayout {
   private fun setDrawableForBackgroundLayers(width: Int, height: Int) {
     circularBackgroundLayers.forEach { layer ->
       layer as ImageView
-      layer.setImageDrawable(createCircularBackgroundDrawable(
-        width,
-        height,
-        backgroundColour
-      ))
+      layer.setImageDrawable(
+        createCircularBackgroundDrawable(
+          width, height, backgroundColour
+        )
+      )
     }
   }
 
@@ -433,14 +433,12 @@ open class AnimatedDropletWidget : FrameLayout {
       animateCircularBackground(
         targetView = layer,
         startTime = lerp(0L, maxDuration, lerpFactor).randomVariation(
-          random,
-          BACKGROUND_STARTTIME_BASE_RANDOM_FACTOR * randomFactor
+          random, BACKGROUND_STARTTIME_BASE_RANDOM_FACTOR * randomFactor
         ).coerceAtLeast(0L),
         repeatDelay = actualDuration.randomVariation(random, BACKGROUND_REPEATDELAY_BASE_RANDOM_FACTOR * randomFactor),
         duration = actualDuration.randomVariation(random, BACKGROUND_DURATION_BASE_RANDOM_FACTOR * randomFactor),
         endSize = lerp(endsizeMin, endsizeMax, lerpFactor).randomVariation(
-          random,
-          BACKGROUND_ENDSIZE_BASE_RANDOM_FACTOR * randomFactor
+          random, BACKGROUND_ENDSIZE_BASE_RANDOM_FACTOR * randomFactor
         ).coerceAtMost(100),
         fadeout = fadeout
       )
@@ -482,15 +480,6 @@ open class AnimatedDropletWidget : FrameLayout {
     circularDropletsLayers.forEach { animation?.start() }
   }
   //</editor-fold
-
-
-
-
-
-
-
-
-
 
 
   //<editor-fold desc="AnimationSet construction wrappers">
@@ -594,11 +583,6 @@ open class AnimatedDropletWidget : FrameLayout {
   //</editor-fold>
 
 
-
-
-
-
-
   //proven that this feels good on the ui with serious laboratory testing. true story
   private fun generateDropletBackgroundPath(random: Random, randomFactor: Float = 0.005f) = Path().apply {
     moveTo(0.000f, 0.000f)
@@ -633,27 +617,6 @@ open class AnimatedDropletWidget : FrameLayout {
   private fun printViewAttributes() = StringBuilder(1024).append(
     "drawableSrc: ${drawableSrc.toResourceEntryName(
       context
-    )}\n" + "drawableAlpha: $drawableAlpha\n" +
-        "drawableSize: $drawableSize\n" +
-        "circularDropletsLayersCount: " +
-        "$circularDropletsLayersCount\n" +
-        "backgroundLayersCount: $backgroundLayersCount\n" +
-        "oneshotLayersCount: $oneshotLayersCount\n" +
-        "globalRandomInfluence: $globalRandomInfluence\n" +
-        "globalMaxDuration: $globalMaxDuration\n" +
-        "globalColour: $globalColour\n" +
-        "dropletsMaxDuration: $dropletsMaxDuration\n" +
-        "dropletsSpawnsize: $dropletsSpawnsize\n" +
-        "dropletsEndsizeMin: $dropletsEndsizeMin\n" +
-        "dropletsEndsizeMax: $dropletsEndsizeMax\n" +
-        "dropletsFadeout: $dropletsFadeout\n" +
-        "dropletsThickness: $dropletsThickness\n" +
-        "backgroundMaxDuration: $backgroundMaxDuration\n" +
-        "backgroundEndsizeMin: $backgroundEndsizeMin\n" +
-        "backgroundEndsizeMax: $backgroundEndsizeMax\n" +
-        "backgroundFadeout: $backgroundFadeout\n" +
-        "backgroundColour: $backgroundColour\n" +
-        "oneshotMaxDuration: $oneshotMaxDuration\n" +
-        "oneshotColour: $oneshotColour\n"
+    )}\n" + "drawableAlpha: $drawableAlpha\n" + "drawableSize: $drawableSize\n" + "circularDropletsLayersCount: " + "$circularDropletsLayersCount\n" + "backgroundLayersCount: $backgroundLayersCount\n" + "oneshotLayersCount: $oneshotLayersCount\n" + "globalRandomInfluence: $globalRandomInfluence\n" + "globalMaxDuration: $globalMaxDuration\n" + "globalColour: $globalColour\n" + "dropletsMaxDuration: $dropletsMaxDuration\n" + "dropletsSpawnsize: $dropletsSpawnsize\n" + "dropletsEndsizeMin: $dropletsEndsizeMin\n" + "dropletsEndsizeMax: $dropletsEndsizeMax\n" + "dropletsFadeout: $dropletsFadeout\n" + "dropletsThickness: $dropletsThickness\n" + "backgroundMaxDuration: $backgroundMaxDuration\n" + "backgroundEndsizeMin: $backgroundEndsizeMin\n" + "backgroundEndsizeMax: $backgroundEndsizeMax\n" + "backgroundFadeout: $backgroundFadeout\n" + "backgroundColour: $backgroundColour\n" + "oneshotMaxDuration: $oneshotMaxDuration\n" + "oneshotColour: $oneshotColour\n"
   )
 }
