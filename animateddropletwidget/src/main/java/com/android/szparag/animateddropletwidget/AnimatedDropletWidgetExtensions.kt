@@ -130,7 +130,25 @@ fun Long.randomVariation(random: Random, factor: Float) =
  * Clamps value between range between min and max input parameters.
  * Range is inclusive from both sides.
  */
-fun Float.clamp(min: Float, max: Float) = this.coerceAtLeast(min).coerceAtMost(max)
+fun Float.clamp(min: Float, max: Float) = coerceAtLeast(min).coerceAtMost(max)
+
+/**
+ * Clamps value between range between min and max input parameters.
+ * Range is inclusive from both sides.
+ */
+fun Double.clamp(min: Double, max: Double) = coerceAtLeast(min).coerceAtMost(max)
+
+/**
+ * Clamps value between range between min and max input parameters.
+ * Range is inclusive from both sides.
+ */
+fun Int.clamp(min: Int, max: Int) = coerceAtLeast(min).coerceAtMost(max)
+
+/**
+ * Clamps value between range between min and max input parameters.
+ * Range is inclusive from both sides.
+ */
+fun Long.clamp(min: Long, max: Long) = coerceAtLeast(min).coerceAtMost(max)
 
 /**
  * Lerp - Linear Interpolation

@@ -21,6 +21,8 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import timber.log.Timber
 import java.util.*
+import kotlin.math.max
+import kotlin.math.min
 
 typealias Millis = Long
 typealias ResourceId = Int
@@ -54,7 +56,7 @@ private const val ATTRS_DROPLETS_ENDSIZE_MAX: Percentage = 100
 private const val ATTRS_DROPLETS_ENDSIZE_MIN: Percentage =
   ATTRS_DRAWABLE_SIZE + (ATTRS_DROPLETS_ENDSIZE_MAX - ATTRS_DROPLETS_ENDSIZE_MAX) / 3 //todo: this 3 as constant
 private const val ATTRS_DROPLETS_FADEOUT: Factor = 1.00F
-private const val ATTRS_DROPLETS_THICKNESS = 5.00F
+private const val ATTRS_DROPLETS_THICKNESS = 10.00F
 //</editor-fold>
 
 //<editor-fold desc="Default XML attribute values for background layers">
@@ -88,7 +90,15 @@ private const val BACKGROUND_REPEATDELAY_BASE_RANDOM_FACTOR: Factor = BACKGROUND
 private const val BACKGROUND_STARTTIME_BASE_RANDOM_FACTOR: Factor = BACKGROUND_DURATION_BASE_RANDOM_FACTOR / 4F
 private const val BACKGROUND_ENDSIZE_BASE_RANDOM_FACTOR: Factor = 0.05F
 
+private const val BACKGROUND_DURATION_MINIMUM_FACTOR: Factor = 0.60F
 private const val BACKGROUND_ENDSIZE_MIN_OVERHEAD: Percentage = 5
+
+private const val DROPLETS_DURATION_BASE_RANDOM_FACTOR: Factor = 0.10F
+private const val DROPLETS_REPEATDELAY_BASE_RANDOM_FACTOR: Factor = DROPLETS_DURATION_BASE_RANDOM_FACTOR * 2F
+private const val DROPLETS_STARTTIME_BASE_RANDOM_FACTOR: Factor = DROPLETS_DURATION_BASE_RANDOM_FACTOR / 4F
+private const val DROPLETS_ENDSIZE_BASE_RANDOM_FACTOR: Factor = 0.05F
+private const val DROPLETS_SPAWNSIZE_BASE_RANDOM_FACTOR: Factor = 0.05F
+private const val DROPLETS_DURATION_MINIMUM_FACTOR: Factor = 0.60F
 
 @SuppressLint("BinaryOperationInTimber") //todo: remove timber
 open class AnimatedDropletWidget : FrameLayout {
@@ -424,7 +434,7 @@ open class AnimatedDropletWidget : FrameLayout {
   private fun constructBackgroundLayersAnimations(maxDuration: Millis, endsizeMin: Percentage, endsizeMax: Percentage,
     fadeout: Factor, randomFactor: Float) {
     //todo: distribution and random is not used
-    val minDuration = (0.60f * maxDuration).toLong()
+    val minDuration = (BACKGROUND_DURATION_MINIMUM_FACTOR * maxDuration).toLong()
     var lerpFactor: Float
     var actualDuration: Millis
     circularBackgroundLayers.forEachIndexed { index, layer ->
@@ -432,14 +442,17 @@ open class AnimatedDropletWidget : FrameLayout {
       actualDuration = lerp(minDuration, maxDuration, lerpFactor)
       animateCircularBackground(
         targetView = layer,
-        startTime = lerp(0L, maxDuration, lerpFactor).randomVariation(
-          random, BACKGROUND_STARTTIME_BASE_RANDOM_FACTOR * randomFactor
-        ).coerceAtLeast(0L),
-        repeatDelay = actualDuration.randomVariation(random, BACKGROUND_REPEATDELAY_BASE_RANDOM_FACTOR * randomFactor),
-        duration = actualDuration.randomVariation(random, BACKGROUND_DURATION_BASE_RANDOM_FACTOR * randomFactor),
-        endSize = lerp(endsizeMin, endsizeMax, lerpFactor).randomVariation(
-          random, BACKGROUND_ENDSIZE_BASE_RANDOM_FACTOR * randomFactor
-        ).coerceAtMost(100),
+        duration = actualDuration
+          .randomVariation(random, BACKGROUND_DURATION_BASE_RANDOM_FACTOR * randomFactor),
+        startTime = lerp(0L, maxDuration, lerpFactor)
+          .randomVariation(random, BACKGROUND_STARTTIME_BASE_RANDOM_FACTOR * randomFactor)
+          .coerceAtLeast(0L),
+        repeatDelay = actualDuration
+          .randomVariation(random, BACKGROUND_REPEATDELAY_BASE_RANDOM_FACTOR * randomFactor)
+          .coerceAtLeast(0L),
+        endSize = lerp(endsizeMin, endsizeMax, lerpFactor)
+          .randomVariation(random, BACKGROUND_ENDSIZE_BASE_RANDOM_FACTOR * randomFactor)
+          .clamp(0, 100),
         fadeout = fadeout
       )
     }
@@ -448,17 +461,29 @@ open class AnimatedDropletWidget : FrameLayout {
   private fun constructDropletLayersAnimations(maxDuration: Millis, spawnSize: Percentage, endsizeMin: Percentage,
     endsizeMax: Percentage, fadeout: Factor, randomFactor: Float) {
     //todo: distribution and random is not used
-    val minDuration = (0.66f * maxDuration).toLong()
+    val minDuration = (DROPLETS_DURATION_MINIMUM_FACTOR * maxDuration).toLong()
     var lerpFactor: Float
+    var actualDuration: Millis
     circularDropletsLayers.forEachIndexed { index, layer ->
-      lerpFactor = index / circularBackgroundLayers.size.toFloat()
+      lerpFactor = index / circularDropletsLayers.size.toFloat()
+      actualDuration = lerp(minDuration, maxDuration, lerpFactor)
       animateCircularDroplet(
         targetView = layer,
-        duration = lerp(minDuration, maxDuration, lerpFactor),
-        startTime = lerp(minDuration, maxDuration, lerpFactor),
-        repeatDelay = (lerp(minDuration, maxDuration, lerpFactor) * 0.33f).toLong(),
-        spawnSize = spawnSize,
+        duration = actualDuration
+          .randomVariation(random, DROPLETS_DURATION_BASE_RANDOM_FACTOR * randomFactor),
+        startTime = lerp(0L, maxDuration, lerpFactor)
+          .randomVariation(random, DROPLETS_STARTTIME_BASE_RANDOM_FACTOR * randomFactor)
+          .coerceAtLeast(0L),
+        repeatDelay = actualDuration
+          .randomVariation(random, DROPLETS_REPEATDELAY_BASE_RANDOM_FACTOR * randomFactor)
+          .coerceAtLeast(0L),
+        spawnSize = spawnSize
+          .randomVariation(random, DROPLETS_SPAWNSIZE_BASE_RANDOM_FACTOR * randomFactor)
+          .clamp(0, 100),
         endSize = lerp(endsizeMin, endsizeMax, lerpFactor)
+          .randomVariation(random, DROPLETS_ENDSIZE_BASE_RANDOM_FACTOR * randomFactor)
+          .clamp(0, 100),
+        fadeout = fadeout
       )
     }
   }
@@ -483,8 +508,8 @@ open class AnimatedDropletWidget : FrameLayout {
 
 
   //<editor-fold desc="AnimationSet construction wrappers">
-  private fun animateCircularBackground(targetView: View, startTime: Millis, repeatDelay: Millis, duration: Millis,
-    endSize: Percentage = 100, fadeout: Factor = 1f) {
+  private fun animateCircularBackground(targetView: View, duration: Millis, startTime: Millis, repeatDelay: Millis,
+    endSize: Percentage, fadeout: Factor) {
     targetView.show()
     AnimationSet(false).also { set ->
       set.addAnimation(
@@ -505,7 +530,7 @@ open class AnimatedDropletWidget : FrameLayout {
           duration = duration,
           repeatDelay = repeatDelay,
           startTime = startTime,
-          alphaStart = 1f,
+          alphaStart = 1f + (0.25f * fadeout) - 0.25f,
           alphaEnd = 0.00f,
           interpolator = FastOutLinearInInterpolator(),
           timeCutoff = 0.99f - (0.99f * fadeout) + 0.99f
@@ -516,7 +541,7 @@ open class AnimatedDropletWidget : FrameLayout {
   }
 
   private fun animateCircularDroplet(targetView: View, duration: Millis, startTime: Millis, repeatDelay: Millis,
-    spawnSize: Percentage, endSize: Percentage) {
+    spawnSize: Percentage, endSize: Percentage, fadeout: Factor) {
     AnimationSet(false).also { set ->
       set.fillAfter = true
       set.isFillEnabled = true
@@ -527,8 +552,8 @@ open class AnimatedDropletWidget : FrameLayout {
           startTime = startTime,
           repeatDelay = repeatDelay,
           xyStart = spawnSize / 100f,
-          xyEnd = endSize / 100f,
-          interpolator = AnticipateOvershootInterpolator(1.25f),
+          xyEnd = (endSize / 100f).coerceAtMost(100f - dropletsThickness / max(this@AnimatedDropletWidget.height, this@AnimatedDropletWidget.width).toFloat()),
+          interpolator = AnticipateOvershootInterpolator(1.05f),
           timeCutoff = 0.95f
         )
       )
@@ -541,7 +566,7 @@ open class AnimatedDropletWidget : FrameLayout {
           alphaStart = 0.75f,
           alphaEnd = 0.00f,
           interpolator = AccelerateInterpolator(1.05f),
-          timeCutoff = 0.98f
+          timeCutoff = 0.97f - (0.97f * fadeout) + 0.97f
         )
       )
       set.attach(targetView)
