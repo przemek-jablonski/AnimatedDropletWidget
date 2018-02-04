@@ -4,7 +4,6 @@ import android.R.color
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.TypedArray
-import android.graphics.Color
 import android.graphics.Paint.Style.FILL
 import android.graphics.Paint.Style.STROKE
 import android.graphics.Path
@@ -14,7 +13,6 @@ import android.support.annotation.ColorInt
 import android.support.annotation.ColorRes
 import android.support.annotation.DrawableRes
 import android.support.v4.graphics.ColorUtils
-import android.support.v4.view.animation.FastOutLinearInInterpolator
 import android.util.AttributeSet
 import android.view.View
 import android.view.View.MeasureSpec.EXACTLY
@@ -44,7 +42,8 @@ private const val ATTRS_BACKGROUND_LAYERS_COUNT = 2
 private const val ATTRS_ONESHOT_COUNT = 1
 private const val ATTRS_GLOBAL_RANDOM_INFLUENCE: Factor = 1.00F
 private const val ATTRS_GLOBAL_MAX_DURATION: Millis = 5000 //todo: BASE_ANIMATION_LENGTH_MILLIS?
-private const val ATTRS_GLOBAL_COLOUR: ResourceId = color.holo_red_dark
+private const val ATTRS_GLOBAL_PRIMARY_COLOUR: ResourceId = color.holo_red_dark
+private const val ATTRS_GLOBAL_SECONDARY_COLOUR: ResourceId = color.holo_orange_light
 //</editor-fold>
 
 //<editor-fold desc="Default XML attribute values for drawable layer">
@@ -66,13 +65,14 @@ private const val ATTRS_DROPLETS_THICKNESS = 10.00F
 //<editor-fold desc="Default XML attribute values for background layers">
 private const val ATTRS_BACKGROUND_MAX_DURATION: Millis = ATTRS_GLOBAL_MAX_DURATION
 private const val ATTRS_BACKGROUND_ENDSIZE_MAX: Percentage = 100
-private const val ATTRS_BACKGROUND_COLOUR: ResourceId = ATTRS_GLOBAL_COLOUR
+private const val ATTRS_BACKGROUND_PRIMARY_COLOUR: ResourceId = ATTRS_GLOBAL_PRIMARY_COLOUR
+private const val ATTRS_BACKGROUND_SECONDARY_COLOUR: ResourceId = ATTRS_GLOBAL_SECONDARY_COLOUR
 private const val ATTRS_BACKGROUND_FADEOUT: Factor = 1.00F
 //</editor-fold>
 
 //<editor-fold desc="Default XML attribute values for One-Shot layers">
 private const val ATTRS_ONESHOT_MAX_DURATION: Millis = ATTRS_DROPLETS_MAX_DURATION
-private const val ATTRS_ONESHOT_COLOUR: ResourceId = ATTRS_GLOBAL_COLOUR
+private const val ATTRS_ONESHOT_COLOUR: ResourceId = ATTRS_GLOBAL_PRIMARY_COLOUR
 //</editor-fold>
 
 //<editor-fold desc="Default internal values">
@@ -106,6 +106,7 @@ private const val DROPLETS_DURATION_MINIMUM_FACTOR: Factor = 0.60F
 
 private const val PRESET_BREATH_DURATION: Millis = 5000
 
+
 private const val INVALID_RESOURCE_ID: ResourceId = -1
 
 @SuppressLint("BinaryOperationInTimber") //todo: remove timber
@@ -130,7 +131,7 @@ open class AnimatedDropletWidget : FrameLayout {
   private var oneshotLayersCount = ATTRS_ONESHOT_COUNT
   private var globalRandomInfluence = ATTRS_GLOBAL_RANDOM_INFLUENCE
   private var globalMaxDuration: Millis = ATTRS_GLOBAL_MAX_DURATION
-  private var globalColour = ATTRS_GLOBAL_COLOUR
+  private var globalColour = ATTRS_GLOBAL_PRIMARY_COLOUR
 
   private var dropletsMaxDuration = ATTRS_DROPLETS_MAX_DURATION
   private var dropletsSpawnsize = ATTRS_DROPLETS_SPAWNSIZE
@@ -142,8 +143,8 @@ open class AnimatedDropletWidget : FrameLayout {
   private var backgroundMaxDuration = ATTRS_BACKGROUND_MAX_DURATION
   private var backgroundEndsizeMin = (drawableSize * (1 + BACKGROUND_ENDSIZE_MIN_OVERHEAD)).coerceAtMost(100)
   private var backgroundEndsizeMax = ATTRS_BACKGROUND_ENDSIZE_MAX
-  private var backgroundColour = ATTRS_BACKGROUND_COLOUR
-  private var backgroundColourAdditional = ATTRS_BACKGROUND_COLOUR
+  private var backgroundColour = ATTRS_BACKGROUND_PRIMARY_COLOUR
+  private var backgroundColourAdditional = ATTRS_BACKGROUND_PRIMARY_COLOUR
   private var backgroundFadeout = ATTRS_BACKGROUND_FADEOUT
 
   private var oneshotMaxDuration = ATTRS_ONESHOT_MAX_DURATION
@@ -367,8 +368,8 @@ open class AnimatedDropletWidget : FrameLayout {
         circularDropletsLayersCount = 0
         backgroundLayersCount = 5
         backgroundFadeout = 1f
-        backgroundColour = android.R.color.holo_blue_dark //todo: should be lerping between blue and white
-        backgroundColourAdditional = android.R.color.white
+        backgroundColour = android.R.color.holo_red_dark//todo: should be lerping between blue and white
+        backgroundColourAdditional = android.R.color.holo_orange_light
 //        backgroundEndsizeMin = lerp(drawableSize, 100, 0.5f)
         backgroundEndsizeMin = 100
         backgroundEndsizeMax = 100

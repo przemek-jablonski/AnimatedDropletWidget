@@ -17,6 +17,8 @@
   <color name="materialGreen">#aeea00</color>
   <color name="materialRed">#c62828</color>
 
+  <color name="materialGreySemiTransparent">#ca757575</color>
+
   <color name="mockSkypeRed">@color/materialRed</color>
 
 

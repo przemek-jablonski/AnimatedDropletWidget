@@ -19,29 +19,18 @@
 
         <category android:name="android.intent.category.LAUNCHER" />
       </intent-filter>
-      <meta-data
-        android:name="android.app.shortcuts"
-        android:resource="@xml/shortcuts" />
     </activity>
     <activity
       android:name=".MockSkypeActivity"
       android:theme="@style/Theme.AppCompat.Light.NoActionBar"
-      android:exported="true"
       android:screenOrientation="portrait"
       android:configChanges="keyboardHidden"
       android:resizeableActivity="false">
-      <meta-data
-        android:name="android.app.shortcuts"
-        android:resource="@xml/shortcuts" />
     </activity>
 
     <meta-data
       android:name="preloaded_fonts"
       android:resource="@array/preloaded_fonts" />
-
-    <meta-data
-      android:name="android.app.shortcuts"
-      android:resource="@xml/shortcuts" />
   </application>
 
 </manifest>

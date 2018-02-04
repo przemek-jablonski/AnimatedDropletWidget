@@ -1,5 +1,10 @@
 <resources>
   <string name="app_name">AnimatedDropletWidgetShowcase</string>
-  <string name="mock_skype_screen_shortcut">Skype screen</string>
-  <string name="mock_skype_audiocall_description">Group Audio Call</string>
+
+  <string name="showcase_screen_skype_snackbar_content">View preset: BREATHE</string>
+  <string name="showcase_screen_skype_picker_header">View preset: Breathe</string>
+  <string name="showcase_screen_skype_picker_content">Screen imitating group audio/video communication software like Skype. \nAnimated Droplet View is used to indicate that given person is speaking right now.</string>
+
+  <string name="showcase_screen_skype_shortcut_label">Skype screen</string>
+  <string name="showcase_screen_skype_audiocall_description">Group Audio Call</string>
 </resources>

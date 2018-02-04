@@ -1,8 +1,11 @@
 package com.android.szparag.animateddropletwidgetshowcase
 
 import android.annotation.SuppressLint
+import android.content.Context
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
 import android.view.WindowManager
 import io.reactivex.Observable
@@ -15,6 +18,11 @@ import java.util.concurrent.TimeUnit
 class MockSkypeActivity : AppCompatActivity() {
 
   private lateinit var callTimerDisposable: Disposable
+
+  companion object {
+    fun getStartingIntent(packageContext: Context) =
+        Intent(packageContext, MockSkypeActivity::class.java)
+  }
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -34,9 +42,21 @@ class MockSkypeActivity : AppCompatActivity() {
       }
   }
 
+
+  override fun onStart() {
+    super.onStart()
+    showPresetSnackbar()
+  }
+
   override fun onDestroy() {
     super.onDestroy()
     callTimerDisposable.dispose()
+  }
+
+  private fun showPresetSnackbar() {
+    Snackbar
+      .make(findViewById(android.R.id.content), resources.getString(R.string.showcase_screen_skype_snackbar_content), Snackbar.LENGTH_LONG)
+      .show()
   }
 
   @SuppressLint("SetTextI18n")
