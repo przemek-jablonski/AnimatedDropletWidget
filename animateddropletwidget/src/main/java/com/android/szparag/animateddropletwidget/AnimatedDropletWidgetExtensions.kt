@@ -17,6 +17,7 @@ import android.view.animation.Animation
 import android.view.animation.Animation.AnimationListener
 import android.view.animation.AnimationSet
 import android.widget.ImageView
+import com.android.szparag.animateddropletwidget.AnimatedDropletWidget.ColourTransition
 import com.android.szparag.animateddropletwidget.AnimatedDropletWidget.WidgetPreset
 import java.util.*
 import kotlin.math.max
@@ -281,8 +282,11 @@ fun Drawable.asStringPreKitkat() =
 
 fun Any.asShortString() = "${this::class.java.simpleName}@${hashCode()}"
 
-fun WidgetPreset.fromInt(ordinal: Int, default: WidgetPreset = WidgetPreset.values()[0])
+fun fromInt(ordinal: Int, default: WidgetPreset = WidgetPreset.values()[0])
   = WidgetPreset.values().find { it.ordinal == ordinal } ?: default
+
+fun fromInt(ordinal: Int, default: ColourTransition = ColourTransition.values()[0])
+  = ColourTransition.values().find { it.ordinal == ordinal } ?: default
 
 
 //fun WidgetInterpolator.fromInt(ordinal: Int,
