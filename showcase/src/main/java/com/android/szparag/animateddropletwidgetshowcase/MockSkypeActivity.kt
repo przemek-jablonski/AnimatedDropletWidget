@@ -14,7 +14,8 @@ class MockSkypeActivity : AppCompatActivity() {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
     window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
     window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
-      window.statusBarColor = ContextCompat.getColor(this, R.color.mock_skype_background_primary)
+      window.statusBarColor = resources.getColor(R.color.mockSkypeStatusBarColour)
+      window.navigationBarColor = resources.getColor(R.color.mockSkypeNavigationBarColour)
     }
     setContentView(R.layout.activity_mock_skype)
   }
