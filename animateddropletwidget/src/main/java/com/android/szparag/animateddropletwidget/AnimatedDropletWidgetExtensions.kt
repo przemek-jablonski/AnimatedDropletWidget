@@ -19,6 +19,8 @@ import android.view.animation.AnimationSet
 import android.widget.ImageView
 import com.android.szparag.animateddropletwidget.AnimatedDropletWidget.WidgetPreset
 import java.util.*
+import kotlin.math.max
+import kotlin.math.min
 import kotlin.math.roundToInt
 import kotlin.math.roundToLong
 
@@ -192,8 +194,45 @@ fun lerp(first: Int, second: Int, factor: Float) = (first + factor * (second - f
  * @param actual interpolation result.
  * @return factor of linear interpolation.
  */
-fun inverseLerp(first: Int, second: Int, actual: Float) =
-  (actual.clamp(Math.min(first, second).toFloat(), Math.max(first, second).toFloat()) - first) / (second - first)
+fun inverseLerp(first: Float, second: Float, actual: Float) =
+  (actual.clamp(Math.min(first, second), Math.max(first, second)) - first) / (second - first)
+
+/**
+ * inverseLerp - Inverse Linear Interpolation
+ * Produces factor of linear interpolation, given bounds between first and second parameter and actual value.
+ *
+ * @param first Lower range of interpolation.
+ * @param second Upper range of interpolation.
+ * @param actual interpolation result.
+ * @return factor of linear interpolation.
+ */
+fun inverseLerp(first: Long, second: Long, actual: Long): Float =
+  actual.clamp(min(first, second), max(first, second) - first) / (second - first).toFloat()
+//  (actual.clamp(Math.min(first, second).toFloat(), Math.max(first, second).toFloat()) - first) / (second - first)
+
+/**
+ * inverseLerp - Inverse Linear Interpolation
+ * Produces factor of linear interpolation, given bounds between first and second parameter and actual value.
+ *
+ * @param first Lower range of interpolation.
+ * @param second Upper range of interpolation.
+ * @param actual interpolation result.
+ * @return factor of linear interpolation.
+ */
+fun inverseLerp(first: Int, second: Int, actual: Int): Float =
+  actual.clamp(min(first, second), max(first, second) - first) / (second - first).toFloat()
+
+/**
+ * inverseLerp - Inverse Linear Interpolation
+ * Produces factor of linear interpolation, given bounds between first and second parameter and actual value.
+ *
+ * @param first Lower range of interpolation.
+ * @param second Upper range of interpolation.
+ * @param actual interpolation result.
+ * @return factor of linear interpolation.
+ */
+fun inverseLerp(first: Double, second: Double, actual: Double): Float =
+  (actual.clamp(min(first, second), max(first, second) - first) / (second - first).toFloat()).toFloat()
 
 
 fun Widget.hide() {
@@ -242,10 +281,9 @@ fun Drawable.asStringPreKitkat() =
 
 fun Any.asShortString() = "${this::class.java.simpleName}@${hashCode()}"
 
-fun WidgetPreset.fromInt(ordinal: Int, default: WidgetPreset = WidgetPreset.values()[0]): WidgetPreset {
-  WidgetPreset.values().filter { it.ordinal == ordinal }.forEach { return it }
-  return default
-}
+fun WidgetPreset.fromInt(ordinal: Int, default: WidgetPreset = WidgetPreset.values()[0])
+  = WidgetPreset.values().find { it.ordinal == ordinal } ?: default
+
 
 //fun WidgetInterpolator.fromInt(ordinal: Int,
 //  default: WidgetInterpolator = WidgetInterpolator.values()[0]): WidgetInterpolator {

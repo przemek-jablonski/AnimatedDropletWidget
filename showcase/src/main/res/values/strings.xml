@@ -1,3 +1,4 @@
 <resources>
   <string name="app_name">AnimatedDropletWidgetShowcase</string>
+  <string name="mock_skype_audiocall_description">You are in a group audio chat.\nSay hi to your friends!</string>
 </resources>

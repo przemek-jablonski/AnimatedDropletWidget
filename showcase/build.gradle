@@ -34,4 +34,5 @@ dependencies {
   androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
   debugImplementation project(':animateddropletwidget')
   releaseImplementation project(':animateddropletwidget')
+  implementation 'com.android.support:design:27.0.2'
 }

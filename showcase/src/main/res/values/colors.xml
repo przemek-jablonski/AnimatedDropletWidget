@@ -13,4 +13,15 @@
   <color name="materialGreen">#aeea00</color>
 
 
+  <color name="mock_skype_avatar_primary">#0091ea</color>
+  <color name="mock_skype_avatar_secondary">#9ec9de</color>
+  <color name="mock_skype_background_primary">#0277bd</color>
+  <color name="mock_skype_background_secondary">#e0e0e0</color>
+  <color name="mock_skype_button_primary">#ffffff</color>
+  <color name="mock_skype_button_secondary">#e0e0e0</color>
+  <color name="mock_skype_button_red_primary">#c62828</color>
+  <color name="mock_skype_button_red_secondary">#b71c1c</color>
+
+
+
 </resources>

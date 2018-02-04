@@ -14,6 +14,7 @@
       <enum name="flow" value="2" />
       <enum name="radar" value="3" />
       <enum name="irregular" value="4" />
+      <enum name="breath" value="5" />
     </attr>
 
     <attr format="integer" name="droplets_layers_count" />
@@ -54,6 +55,12 @@
     <attr format="integer" name="background_max_duration" /> <!-- fallback to global_max_duration if not set-->
     <attr format="integer" name="background_endsize_max" /> <!-- fallback to droplet_endsize_max if not set-->
     <attr format="reference" name="background_colour" /> <!-- fallback to global_colour if not set-->
+    <attr format="reference" name="background_colour_additional"/>
+    <attr format="enum" name="background_colour_transition">
+      <enum name="forward" value="0" />
+      <enum name="backward" value="1" />
+      <enum name="random" value="2" />
+    </attr>
     <attr format="float" name="background_fadeout" />
     <!--<attr format="float" name="background_colour_distibution" /> &lt;!&ndash; fallback to global_colour if not set&ndash;&gt;-->
     <!--<attr format="enum" name="background_interpolator"> &lt;!&ndash; fallback to global_interpolator if not set&ndash;&gt;-->
