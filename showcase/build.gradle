@@ -35,4 +35,8 @@ dependencies {
   debugImplementation project(':animateddropletwidget')
   releaseImplementation project(':animateddropletwidget')
   implementation 'com.android.support:design:27.0.2'
+
+  implementation group: 'io.reactivex.rxjava2', name: 'rxandroid', version: '2.0.1'
+  implementation group: 'io.reactivex.rxjava2', name: 'rxjava', version: '2.1.9'
+  implementation group: 'io.reactivex.rxjava2', name: 'rxkotlin', version: '2.2.0'
 }
