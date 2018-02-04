@@ -8,70 +8,60 @@
   style="@style/Theme.AppCompat.NoActionBar"
   android:background="@drawable/mock_skype_background_gradient">
 
-  <!--<View-->
-  <!--android:layout_width="0dp"-->
-  <!--android:layout_height="0dp"-->
-  <!--android:background="@drawable/gradient_linear_darken_90"-->
-  <!--app:layout_constraintEnd_toEndOf="parent"-->
-  <!--app:layout_constraintStart_toStartOf="parent"-->
-  <!--app:layout_constraintBottom_toBottomOf="parent"-->
-  <!--app:layout_constraintTop_toBottomOf="@id/textView"-->
-  <!--android:alpha="0.20"-->
-  <!--android:layout_marginTop="32dp" />-->
-
-
-  <!--<View-->
-  <!--android:layout_width="0dp"-->
-  <!--android:layout_height="0dp"-->
-  <!--android:background="@drawable/gradient_linear_darken_270"-->
-  <!--app:layout_constraintEnd_toEndOf="parent"-->
-  <!--app:layout_constraintStart_toStartOf="parent"-->
-  <!--app:layout_constraintTop_toTopOf="parent"-->
-  <!--app:layout_constraintBottom_toTopOf="@id/mainAvatar"-->
-  <!--android:alpha="0.15" />-->
+  <View
+    android:id="@+id/topGradient"
+    android:layout_width="0dp"
+    android:layout_height="0dp"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@id/guideline6"
+    app:layout_constraintBottom_toBottomOf="@id/callDescriptionTextView"
+    android:background="@drawable/mock_skype_top_gradient" />
 
   <TextView
+    android:id="@+id/callDescriptionTextView"
     android:text="@string/mock_skype_audiocall_description"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:id="@+id/callDescriptionTextView"
-    app:layout_constraintEnd_toEndOf="parent"
     android:layout_marginEnd="8dp"
-    app:layout_constraintStart_toStartOf="parent"
     android:layout_marginStart="8dp"
-    app:layout_constraintTop_toTopOf="@+id/guideline6"
     android:layout_marginTop="24dp"
-    android:background="@drawable/mock_skype_text_background"
+    android:layout_marginBottom="24dp"
     android:paddingBottom="8dp"
     android:paddingTop="8dp"
     android:paddingStart="16dp"
     android:paddingEnd="16dp"
-    android:layout_marginBottom="24dp"
+    android:background="@drawable/mock_skype_text_background"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="@+id/guideline6"
     app:layout_constraintBottom_toTopOf="@+id/mainAvatar"
     app:layout_constraintVertical_bias="0.0" />
 
   <TextView
-    tools:text="0:47"
+    android:id="@+id/callDurationTextView"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:id="@+id/callDurationTextView"
-    app:layout_constraintEnd_toEndOf="parent"
     android:layout_marginEnd="8dp"
-    app:layout_constraintStart_toStartOf="parent"
     android:layout_marginStart="8dp"
     android:layout_marginBottom="24dp"
-    app:layout_constraintBottom_toTopOf="@+id/linearLayout"
-    android:typeface="normal"
-    android:background="@drawable/mock_skype_text_background"
+    android:layout_marginTop="24dp"
     android:paddingTop="8dp"
     android:paddingBottom="8dp"
     android:paddingEnd="16dp"
     android:paddingStart="16dp"
-    android:layout_marginTop="24dp"
+    android:textIsSelectable="false"
+    tools:text="0:47"
+    android:typeface="normal"
+    android:background="@drawable/mock_skype_text_background"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintBottom_toTopOf="@+id/bottomPanelButtonsContainer"
     app:layout_constraintTop_toBottomOf="@+id/mainAvatar"
     app:layout_constraintVertical_bias="1.0" />
 
   <View
+    android:id="@+id/topPanelBackground"
     android:layout_width="0dp"
     android:layout_height="@dimen/mockSkypeTopPanelHeight"
     android:background="@color/mockSkypeTopPanelColour"
@@ -81,231 +71,212 @@
     app:layout_constraintBottom_toBottomOf="@id/guideline6" />
 
   <LinearLayout
+    android:id="@+id/topPanelSecondaryAvatarsContainer"
     android:orientation="horizontal"
     android:layout_width="wrap_content"
     android:layout_height="0dp"
-    android:id="@+id/top_linear_layout"
+    android:padding="@dimen/mockSkypeSecondaryAvatarsContainerPadding"
+    android:gravity="end"
+    android:foregroundGravity="right"
     app:layout_constraintTop_toTopOf="@id/guideline9"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintBottom_toBottomOf="@id/guideline6"
-    android:gravity="right|end"
-    android:foregroundGravity="right"
-    app:layout_constraintHorizontal_bias="1.0"
-    android:padding="@dimen/mockSkypeSecondaryAvatarsContainerPadding">
+    app:layout_constraintHorizontal_bias="1.0">
 
     <com.android.szparag.animateddropletwidget.AnimatedDropletWidget
       android:layout_width="match_parent"
       android:layout_height="match_parent"
-      tools:layout_height="@dimen/mockSkypeAvatarSecondarySize"
-      tools:layout_width="@dimen/mockSkypeAvatarSecondarySize"
-      tools:background="@drawable/mock_avatar_4"
-      app:drawable_src="@drawable/mock_avatar_4"
       android:layout_weight="1"
-      android:layout_gravity="right|center_vertical|end"
+      android:layout_gravity="center_vertical|end"
+      android:layout_margin="@dimen/mockSkypeAvatarSecondaryMargin"
+      app:drawable_src="@drawable/mock_avatar_4"
       app:background_layers_count="0"
       app:droplets_layers_count="0"
-      android:layout_marginStart="@dimen/mockSkypeAvatarSecondaryMargin"
-      android:layout_marginEnd="@dimen/mockSkypeAvatarSecondaryMargin"
-      android:layout_marginRight="@dimen/mockSkypeAvatarSecondaryMargin"
-      android:layout_marginLeft="@dimen/mockSkypeAvatarSecondaryMargin" />
+      tools:layout_height="@dimen/mockSkypeAvatarSecondarySize"
+      tools:layout_width="@dimen/mockSkypeAvatarSecondarySize"
+      tools:background="@drawable/mock_avatar_4" />
 
     <com.android.szparag.animateddropletwidget.AnimatedDropletWidget
       android:layout_width="match_parent"
       android:layout_height="match_parent"
-      tools:layout_height="@dimen/mockSkypeAvatarSecondarySize"
-      tools:layout_width="@dimen/mockSkypeAvatarSecondarySize"
+      android:layout_weight="1"
+      android:layout_gravity="center_vertical|end"
+      android:layout_margin="@dimen/mockSkypeAvatarSecondaryMargin"
       app:preset="breath"
-      tools:background="@drawable/mock_avatar_2"
       app:drawable_src="@drawable/mock_avatar_2"
-      android:layout_weight="1"
-      android:layout_gravity="right|center_vertical|end"
-      android:layout_marginStart="@dimen/mockSkypeAvatarSecondaryMargin"
-      android:layout_marginEnd="@dimen/mockSkypeAvatarSecondaryMargin"
-      android:layout_marginRight="@dimen/mockSkypeAvatarSecondaryMargin"
-      android:layout_marginLeft="@dimen/mockSkypeAvatarSecondaryMargin"/>
+      tools:layout_height="@dimen/mockSkypeAvatarSecondarySize"
+      tools:layout_width="@dimen/mockSkypeAvatarSecondarySize"
+      tools:background="@drawable/mock_avatar_2" />
 
     <com.android.szparag.animateddropletwidget.AnimatedDropletWidget
       android:layout_width="match_parent"
       android:layout_height="match_parent"
+      android:layout_weight="1"
+      android:layout_gravity="center_vertical|end"
+      android:layout_margin="@dimen/mockSkypeAvatarSecondaryMargin"
+      app:preset="breath"
+      app:drawable_src="@drawable/mock_avatar_1"
       tools:layout_height="@dimen/mockSkypeAvatarSecondarySize"
       tools:layout_width="@dimen/mockSkypeAvatarSecondarySize"
-      tools:background="@drawable/mock_avatar_1"
-      app:drawable_src="@drawable/mock_avatar_1"
-      app:preset="breath"
-      android:layout_weight="1"
-      android:layout_gravity="right|center_vertical|end"
-      android:layout_marginStart="@dimen/mockSkypeAvatarSecondaryMargin"
-      android:layout_marginEnd="@dimen/mockSkypeAvatarSecondaryMargin"
-      android:layout_marginRight="@dimen/mockSkypeAvatarSecondaryMargin"
-      android:layout_marginLeft="@dimen/mockSkypeAvatarSecondaryMargin" />
+      tools:background="@drawable/mock_avatar_1" />
+
   </LinearLayout>
 
-  <View
-    android:id="@+id/line1"
-    android:layout_height="1dp"
-    android:layout_width="match_parent"
-    android:background="@color/colorFontPrimary"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/top_linear_layout"
-    android:elevation="2dp" />
-
-
   <android.support.constraint.Guideline
+    android:id="@+id/guideline"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:id="@+id/guideline"
     android:orientation="vertical"
     app:layout_constraintGuide_percent="0.5" />
 
   <android.support.constraint.Guideline
+    android:id="@+id/guideline2"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:id="@+id/guideline2"
     android:orientation="horizontal"
     app:layout_constraintGuide_percent="0.5" />
 
   <android.support.constraint.Guideline
+    android:id="@+id/guideline9"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:id="@+id/guideline9"
     android:orientation="horizontal"
     app:layout_constraintGuide_percent="0.0" />
 
   <android.support.constraint.Guideline
+    android:id="@+id/guideline6"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:id="@+id/guideline6"
     android:orientation="horizontal"
     app:layout_constraintGuide_begin="92dp" />
 
   <android.support.constraint.Guideline
+    android:id="@+id/guideline7"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:id="@+id/guideline7"
     android:orientation="horizontal"
     app:layout_constraintGuide_percent="0.95" />
 
   <android.support.constraint.Guideline
+    android:id="@+id/guideline8"
     android:layout_width="0dp"
     android:layout_height="wrap_content"
-    android:id="@+id/guideline8"
     android:orientation="horizontal"
     app:layout_constraintGuide_percent="0.8" />
 
   <LinearLayout
+    android:id="@+id/bottomPanelButtonsContainer"
     android:orientation="horizontal"
     android:layout_width="0dp"
     android:layout_height="0dp"
+    android:layout_marginStart="@dimen/mockSkypeButtonContainerMarginSides"
+    android:layout_marginEnd="@dimen/mockSkypeButtonContainerMarginSides"
+    android:clipChildren="false"
+    android:clipToPadding="false"
     app:layout_constraintTop_toTopOf="@id/guideline8"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintBottom_toBottomOf="@id/guideline7"
-    android:clipChildren="false"
-    android:clipToPadding="false"
-    android:layout_marginStart="@dimen/mockSkypeButtonContainerMarginSides"
-    android:layout_marginEnd="@dimen/mockSkypeButtonContainerMarginSides"
-    android:id="@+id/linearLayout">
+    app:layout_constraintBottom_toBottomOf="@id/guideline7">
 
     <android.support.design.widget.FloatingActionButton
+      android:id="@+id/buttonAddPeople"
       android:layout_width="match_parent"
       android:layout_height="match_parent"
+      android:layout_margin="@dimen/mockSkypeButtonMargin"
+      android:layout_weight="10"
+      android:layout_gravity="center"
       android:clickable="true"
       android:focusable="true"
       android:hapticFeedbackEnabled="true"
       android:soundEffectsEnabled="true"
+      android:tint="@color/mockSkypeButtonNormalIconTintColour"
+      app:elevation="@dimen/mockSkypeButtonElevationSmall"
       app:srcCompat="@drawable/ic_action_plus"
-      android:id="@+id/floatingActionButton1"
-      android:layout_weight="10"
-      app:elevation="@dimen/mockSkypeButtonElevationSmall"
-      android:layout_margin="@dimen/mockSkypeButtonMargin"
       app:backgroundTint="@color/mockSkypeButtonNormalBackgroundColour"
-      android:tint="@color/mockSkypeButtonNormalIconTintColour"
-      app:rippleColor="@color/mockSkypeButtonNormalRippleColour"
-      android:layout_gravity="center" />
+      app:rippleColor="@color/mockSkypeButtonNormalRippleColour" />
 
     <android.support.design.widget.FloatingActionButton
+      android:id="@+id/buttonCamera"
       android:layout_width="match_parent"
       android:layout_height="match_parent"
+      android:layout_margin="@dimen/mockSkypeButtonMargin"
+      android:layout_weight="10"
+      android:layout_gravity="center"
       android:clickable="true"
       android:focusable="true"
       android:hapticFeedbackEnabled="true"
       android:soundEffectsEnabled="true"
+      android:tint="@color/mockSkypeButtonNormalIconTintColour"
+      app:elevation="@dimen/mockSkypeButtonElevationNormal"
       app:srcCompat="@drawable/ic_action_camera"
-      android:id="@+id/floatingActionButton2"
-      android:layout_weight="10"
-      app:elevation="@dimen/mockSkypeButtonElevationNormal"
-      android:layout_margin="@dimen/mockSkypeButtonMargin"
       app:backgroundTint="@color/mockSkypeButtonNormalBackgroundColour"
-      android:tint="@color/mockSkypeButtonNormalIconTintColour"
-      app:rippleColor="@color/mockSkypeButtonNormalRippleColour"
-      android:layout_gravity="center" />
+      app:rippleColor="@color/mockSkypeButtonNormalRippleColour" />
 
     <android.support.design.widget.FloatingActionButton
-      android:layout_width="match_parent"
-      android:layout_height="match_parent"
-      android:clickable="true"
-      android:focusable="true"
-      android:hapticFeedbackEnabled="true"
-      android:soundEffectsEnabled="true"
-      app:srcCompat="@drawable/ic_action_end_call"
       android:id="@+id/floatingActionButton3"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:layout_margin="@dimen/mockSkypeButtonMargin"
       android:layout_weight="0"
-      app:elevation="@dimen/mockSkypeButtonElevationBig"
-      android:layout_margin="@dimen/mockSkypeButtonMargin"
-      app:backgroundTint="@color/mockSkypeButtonSpecialBackgroundColour"
-      android:tint="@color/mockSkypeButtonSpecialIconTintColour"
-      app:rippleColor="@color/mockSkypeButtonSpecialRippleColour"
+      android:layout_gravity="center"
+      android:clickable="true"
+      android:focusable="true"
+      android:hapticFeedbackEnabled="true"
+      android:soundEffectsEnabled="true"
       android:cropToPadding="false"
-      android:layout_gravity="center" />
+      android:tint="@color/mockSkypeButtonSpecialIconTintColour"
+      app:elevation="@dimen/mockSkypeButtonElevationBig"
+      app:srcCompat="@drawable/ic_action_end_call"
+      app:backgroundTint="@color/mockSkypeButtonSpecialBackgroundColour"
+      app:rippleColor="@color/mockSkypeButtonSpecialRippleColour" />
 
     <android.support.design.widget.FloatingActionButton
-      android:layout_width="match_parent"
-      android:layout_height="match_parent"
-      android:clickable="true"
-      android:focusable="true"
-      android:hapticFeedbackEnabled="true"
-      android:soundEffectsEnabled="true"
-      app:srcCompat="@drawable/ic_action_microphone"
       android:id="@+id/floatingActionButton4"
-      android:layout_weight="10"
-      app:elevation="@dimen/mockSkypeButtonElevationNormal"
-      android:layout_margin="@dimen/mockSkypeButtonMargin"
-      app:backgroundTint="@color/mockSkypeButtonNormalBackgroundColour"
-      android:tint="@color/mockSkypeButtonNormalIconTintColour"
-      app:rippleColor="@color/mockSkypeButtonNormalRippleColour"
-      android:layout_gravity="center" />
-
-    <android.support.design.widget.FloatingActionButton
       android:layout_width="match_parent"
       android:layout_height="match_parent"
+      android:layout_margin="@dimen/mockSkypeButtonMargin"
+      android:layout_weight="10"
+      android:layout_gravity="center"
       android:clickable="true"
       android:focusable="true"
       android:hapticFeedbackEnabled="true"
       android:soundEffectsEnabled="true"
-      app:srcCompat="@drawable/ic_action_settings"
-      android:id="@+id/floatingActionButton5"
-      android:layout_weight="10"
-      app:elevation="@dimen/mockSkypeButtonElevationSmall"
-      android:layout_margin="@dimen/mockSkypeButtonMargin"
-      app:backgroundTint="@color/mockSkypeButtonNormalBackgroundColour"
       android:tint="@color/mockSkypeButtonNormalIconTintColour"
-      app:rippleColor="@color/mockSkypeButtonNormalRippleColour"
-      android:layout_gravity="center" />
+      app:elevation="@dimen/mockSkypeButtonElevationNormal"
+      app:srcCompat="@drawable/ic_action_microphone"
+      app:backgroundTint="@color/mockSkypeButtonNormalBackgroundColour"
+      app:rippleColor="@color/mockSkypeButtonNormalRippleColour" />
+
+    <android.support.design.widget.FloatingActionButton
+      android:id="@+id/buttonSettings"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:layout_margin="@dimen/mockSkypeButtonMargin"
+      android:layout_weight="10"
+      android:layout_gravity="center"
+      android:clickable="true"
+      android:focusable="true"
+      android:hapticFeedbackEnabled="true"
+      android:soundEffectsEnabled="true"
+      android:tint="@color/mockSkypeButtonNormalIconTintColour"
+      app:elevation="@dimen/mockSkypeButtonElevationSmall"
+      app:srcCompat="@drawable/ic_action_settings"
+      app:backgroundTint="@color/mockSkypeButtonNormalBackgroundColour"
+      app:rippleColor="@color/mockSkypeButtonNormalRippleColour" />
   </LinearLayout>
 
   <android.support.constraint.Guideline
+    android:id="@+id/guideline10"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:id="@+id/guideline10"
     android:orientation="horizontal"
     app:layout_constraintGuide_percent="0.28" />
 
   <android.support.constraint.Guideline
+    android:id="@+id/guideline11"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:id="@+id/guideline11"
     android:orientation="horizontal"
     app:layout_constraintGuide_percent="0.61" />
 
@@ -313,29 +284,26 @@
     android:id="@+id/mainAvatar"
     android:layout_width="@dimen/mockSkypeAvatarPrimarySize"
     android:layout_height="@dimen/mockSkypeAvatarPrimarySize"
+    android:layout_margin="@dimen/mockSkypeAvatarPrimaryMargin"
+    app:preset="breath"
+    app:drawable_src="@drawable/mock_avatar_3"
+    tools:background="@drawable/mock_avatar_3"
     app:layout_constraintStart_toStartOf="@id/guideline12"
     app:layout_constraintEnd_toEndOf="@id/guideline13"
-    tools:background="@drawable/mock_avatar_3"
-    app:drawable_src="@drawable/mock_avatar_3"
-    app:preset="breath"
-    android:layout_marginStart="@dimen/mockSkypeAvatarPrimaryMargin"
-    android:layout_marginEnd="@dimen/mockSkypeAvatarPrimaryMargin"
-    android:layout_marginBottom="@dimen/mockSkypeAvatarPrimaryMargin"
-    app:layout_constraintBottom_toTopOf="@+id/linearLayout"
-    app:layout_constraintTop_toTopOf="@+id/guideline6"
-    android:layout_marginTop="@dimen/mockSkypeAvatarPrimaryMargin" />
+    app:layout_constraintBottom_toTopOf="@+id/bottomPanelButtonsContainer"
+    app:layout_constraintTop_toTopOf="@+id/guideline6" />
 
   <android.support.constraint.Guideline
+    android:id="@+id/guideline12"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:id="@+id/guideline12"
     android:orientation="vertical"
     app:layout_constraintGuide_percent="0.20924574" />
 
   <android.support.constraint.Guideline
+    android:id="@+id/guideline13"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:id="@+id/guideline13"
     android:orientation="vertical"
     app:layout_constraintGuide_percent="0.79" />
 
