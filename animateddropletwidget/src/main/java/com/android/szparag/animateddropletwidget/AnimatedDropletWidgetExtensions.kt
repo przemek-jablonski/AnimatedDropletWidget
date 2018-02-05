@@ -35,39 +35,39 @@ private val animationListenerCallbackStub: (Animation?) -> Unit = {}
 
 /**
  * Draws random Float between min and max range (both are inclusive!).
- * @param min lowest bound of randomization, inclusive. Floats will not be drawn below that value.
- * @param max highest bound of randomization, inclusive. Floats will not be drawn above that value.
+ * @param min lowest bound of randomization, inclusive. Floats will not be drawn below that internal value.
+ * @param max highest bound of randomization, inclusive. Floats will not be drawn above that internal value.
  *
  * @return random Float between specified input range.
  */
-fun Random.nextFloat(min: Float, max: Float) = nextFloat() * (max - min) + min
+internal fun Random.nextFloat(min: Float, max: Float) = nextFloat() * (max - min) + min
 
 /**
  * Draws random Double between min and max range (both are inclusive!).
- * @param min lowest bound of randomization, inclusive. Doubles will not be drawn below that value.
- * @param max highest bound of randomization, inclusive. Doubles will not be drawn above that value.
+ * @param min lowest bound of randomization, inclusive. Doubles will not be drawn below that internal value.
+ * @param max highest bound of randomization, inclusive. Doubles will not be drawn above that internal value.
  *
  * @return random Double between specified input range.
  */
-fun Random.nextDouble(min: Double, max: Double) = nextDouble() * (max - min) + min
+internal fun Random.nextDouble(min: Double, max: Double) = nextDouble() * (max - min) + min
 
 /**
  * Draws random Int between min and max range (both are inclusive!).
- * @param min lowest bound of randomization, inclusive. Ints will not be drawn below that value.
- * @param max highest bound of randomization, inclusive. Ints will not be drawn above that value.
+ * @param min lowest bound of randomization, inclusive. Ints will not be drawn below that internal value.
+ * @param max highest bound of randomization, inclusive. Ints will not be drawn above that internal value.
  *
  * @return random Int between specified input range.
  */
-fun Random.nextInt(min: Int, max: Int) = (nextFloat() * (max - min) + min).roundToInt()
+internal fun Random.nextInt(min: Int, max: Int) = (nextFloat() * (max - min) + min).roundToInt()
 
 /**
  * Draws random Long between min and max range (both are inclusive!).
- * @param min lowest bound of randomization, inclusive. Longs will not be drawn below that value.
- * @param max highest bound of randomization, inclusive. Longs will not be drawn above that value.
+ * @param min lowest bound of randomization, inclusive. Longs will not be drawn below that internal value.
+ * @param max highest bound of randomization, inclusive. Longs will not be drawn above that internal value.
  *
  * @return random Long between specified input range.
  */
-fun Random.nextLong(min: Long, max: Long) = (nextFloat() * (max - min) + min).roundToLong()
+internal fun Random.nextLong(min: Long, max: Long) = (nextFloat() * (max - min) + min).roundToLong()
 
 /**
  * Introduces random variation of a given number by a given factor.
@@ -81,7 +81,7 @@ fun Random.nextLong(min: Long, max: Long) = (nextFloat() * (max - min) + min).ro
  * @param factor upper and lower bound of drawing
  *
  */
-fun Float.randomVariation(random: Random, factor: Float) =
+internal fun Float.randomVariation(random: Random, factor: Float) =
   if (factor != 0f) random.nextFloat(this - this * factor, this + this * factor) else this
 
 /**
@@ -96,7 +96,7 @@ fun Float.randomVariation(random: Random, factor: Float) =
  * @param factor upper and lower bound of drawing
  *
  */
-fun Double.randomVariation(random: Random, factor: Float) =
+internal fun Double.randomVariation(random: Random, factor: Float) =
   if (factor != 0f) random.nextDouble(this - this * factor, this + this * factor) else this
 
 /**
@@ -111,7 +111,7 @@ fun Double.randomVariation(random: Random, factor: Float) =
  * @param factor upper and lower bound of drawing
  *
  */
-fun Int.randomVariation(random: Random, factor: Float) =
+internal fun Int.randomVariation(random: Random, factor: Float) =
   if (factor != 0f) random.nextInt((this - this * factor).toInt(), (this + this * factor).toInt()) else this
 
 /**
@@ -126,184 +126,182 @@ fun Int.randomVariation(random: Random, factor: Float) =
  * @param factor upper and lower bound of drawing
  *
  */
-fun Long.randomVariation(random: Random, factor: Float) =
+internal fun Long.randomVariation(random: Random, factor: Float) =
   if (factor != 0f) random.nextLong((this - this * factor).toLong(), (this + this * factor).toLong()) else this
 
 /**
- * Clamps value between range between min and max input parameters.
+ * Clamps internal value between range between min and max input parameters.
  * Range is inclusive from both sides.
  */
-fun Float.clamp(min: Float, max: Float) = coerceAtLeast(min).coerceAtMost(max)
+internal fun Float.clamp(min: Float, max: Float) = coerceAtLeast(min).coerceAtMost(max)
 
 /**
- * Clamps value between range between min and max input parameters.
+ * Clamps internal value between range between min and max input parameters.
  * Range is inclusive from both sides.
  */
-fun Double.clamp(min: Double, max: Double) = coerceAtLeast(min).coerceAtMost(max)
+internal fun Double.clamp(min: Double, max: Double) = coerceAtLeast(min).coerceAtMost(max)
 
 /**
- * Clamps value between range between min and max input parameters.
+ * Clamps internal value between range between min and max input parameters.
  * Range is inclusive from both sides.
  */
-fun Int.clamp(min: Int, max: Int) = coerceAtLeast(min).coerceAtMost(max)
+internal fun Int.clamp(min: Int, max: Int) = coerceAtLeast(min).coerceAtMost(max)
 
 /**
- * Clamps value between range between min and max input parameters.
+ * Clamps internal value between range between min and max input parameters.
  * Range is inclusive from both sides.
  */
-fun Long.clamp(min: Long, max: Long) = coerceAtLeast(min).coerceAtMost(max)
+internal fun Long.clamp(min: Long, max: Long) = coerceAtLeast(min).coerceAtMost(max)
 
 /**
  * Lerp - Linear Interpolation
- * Produces linearly interpolated value between first and second parameter by factor of factor.
+ * Produces linearly interpolated internal value between first and second parameter by factor of factor.
  *
  * @param first Lower range of interpolation.
  * @param second Upper range of interpolation.
  * @param factor Interpolation factor.
- * @return value of linear interpolation.
+ * @return internal value of linear interpolation.
  */
-fun lerp(first: Float, second: Float, factor: Float) = first + factor * (second - first)
+internal fun lerp(first: Float, second: Float, factor: Float) = first + factor * (second - first)
 
 /**
  * Lerp - Linear Interpolation
- * Produces linearly interpolated value between first and second parameter by factor of factor.
+ * Produces linearly interpolated internal value between first and second parameter by factor of factor.
  *
  * @param first Lower range of interpolation.
  * @param second Upper range of interpolation.
  * @param factor Interpolation factor.
- * @return value of linear interpolation.
+ * @return internal value of linear interpolation.
  */
-fun lerp(first: Long, second: Long, factor: Float) = (first + factor * (second - first)).toLong()
+internal fun lerp(first: Long, second: Long, factor: Float) = (first + factor * (second - first)).toLong()
 
 /**
  * Lerp - Linear Interpolation
- * Produces linearly interpolated value between first and second parameter by factor of factor.
+ * Produces linearly interpolated internal value between first and second parameter by factor of factor.
  *
  * @param first Lower range of interpolation.
  * @param second Upper range of interpolation.
  * @param factor Interpolation factor.
- * @return value of linear interpolation.
+ * @return internal value of linear interpolation.
  */
-fun lerp(first: Int, second: Int, factor: Float) = (first + factor * (second - first)).toInt()
+internal fun lerp(first: Int, second: Int, factor: Float) = (first + factor * (second - first)).toInt()
 
 /**
  * inverseLerp - Inverse Linear Interpolation
- * Produces factor of linear interpolation, given bounds between first and second parameter and actual value.
+ * Produces factor of linear interpolation, given bounds between first and second parameter and actual internal value.
  *
  * @param first Lower range of interpolation.
  * @param second Upper range of interpolation.
  * @param actual interpolation result.
  * @return factor of linear interpolation.
  */
-fun inverseLerp(first: Float, second: Float, actual: Float) =
+internal fun inverseLerp(first: Float, second: Float, actual: Float) =
   (actual.clamp(Math.min(first, second), Math.max(first, second)) - first) / (second - first)
 
 /**
  * inverseLerp - Inverse Linear Interpolation
- * Produces factor of linear interpolation, given bounds between first and second parameter and actual value.
+ * Produces factor of linear interpolation, given bounds between first and second parameter and actual internal value.
  *
  * @param first Lower range of interpolation.
  * @param second Upper range of interpolation.
  * @param actual interpolation result.
  * @return factor of linear interpolation.
  */
-fun inverseLerp(first: Long, second: Long, actual: Long): Float =
+internal fun inverseLerp(first: Long, second: Long, actual: Long): Float =
   actual.clamp(min(first, second), max(first, second) - first) / (second - first).toFloat()
 //  (actual.clamp(Math.min(first, second).toFloat(), Math.max(first, second).toFloat()) - first) / (second - first)
 
 /**
  * inverseLerp - Inverse Linear Interpolation
- * Produces factor of linear interpolation, given bounds between first and second parameter and actual value.
+ * Produces factor of linear interpolation, given bounds between first and second parameter and actual internal value.
  *
  * @param first Lower range of interpolation.
  * @param second Upper range of interpolation.
  * @param actual interpolation result.
  * @return factor of linear interpolation.
  */
-fun inverseLerp(first: Int, second: Int, actual: Int): Float =
+internal fun inverseLerp(first: Int, second: Int, actual: Int): Float =
   actual.clamp(min(first, second), max(first, second) - first) / (second - first).toFloat()
 
 /**
  * inverseLerp - Inverse Linear Interpolation
- * Produces factor of linear interpolation, given bounds between first and second parameter and actual value.
+ * Produces factor of linear interpolation, given bounds between first and second parameter and actual internal value.
  *
  * @param first Lower range of interpolation.
  * @param second Upper range of interpolation.
  * @param actual interpolation result.
  * @return factor of linear interpolation.
  */
-fun inverseLerp(first: Double, second: Double, actual: Double): Float =
+internal fun inverseLerp(first: Double, second: Double, actual: Double): Float =
   (actual.clamp(min(first, second), max(first, second) - first) / (second - first).toFloat()).toFloat()
 
 
-fun Widget.hide() {
+internal fun Widget.hide() {
   if (visibility != GONE) visibility = GONE
 }
 
-fun Widget.show() {
+internal fun Widget.show() {
   if (visibility != VISIBLE) visibility = VISIBLE
 }
 
-fun View.isHidden() = visibility == GONE
+internal fun View.isHidden() = visibility == GONE
 
-fun View.isNotHidden() = !isHidden()
+internal fun View.isNotHidden() = !isHidden()
 
-fun View.isVisible() = visibility == VISIBLE
+internal fun View.isVisible() = visibility == VISIBLE
 
-fun createImageViewWithDrawable(context: Context, drawable: Drawable?) =
+internal fun createImageViewWithDrawable(context: Context, drawable: Drawable?) =
   ImageView(context).apply { setImageDrawable(drawable) }
 
 
-fun AnimationSet.attach(targetView: View) {
+internal fun AnimationSet.attach(targetView: View) {
   targetView.animation = this
 }
 
-fun Animation.setListenerBy(onStart: (Animation?) -> (Unit) = animationListenerCallbackStub,
+internal fun Animation.setListenerBy(onStart: (Animation?) -> (Unit) = animationListenerCallbackStub,
   onEnd: (Animation?) -> (Unit) = animationListenerCallbackStub,
   onRepeat: (Animation?) -> (Unit) = animationListenerCallbackStub) =
   this.setAnimationListener(object : AnimationListener {
     override fun onAnimationRepeat(animation: Animation?) = onRepeat(animation)
-
     override fun onAnimationEnd(animation: Animation?) = onEnd(animation)
-
     override fun onAnimationStart(animation: Animation?) = onStart(animation)
   })
 
-fun View.asString() = "${asShortString()} (${id.toResourceEntryName(context)})"
+internal fun View.asString() = "${asShortString()} (${id.toResourceEntryName(context)})"
 
-fun Drawable.asString() = if (VERSION.SDK_INT >= VERSION_CODES.KITKAT) asStringPostKitkat() else asStringPreKitkat()
+internal fun Drawable.asString() = if (VERSION.SDK_INT >= VERSION_CODES.KITKAT) asStringPostKitkat() else asStringPreKitkat()
 
 @RequiresApi(VERSION_CODES.KITKAT)
-fun Drawable.asStringPostKitkat() =
+internal fun Drawable.asStringPostKitkat() =
   "${this::class.java.simpleName}@${hashCode()}, bounds: ${this.bounds}, iHeight: ${this.intrinsicHeight}, iWidth: ${this.intrinsicWidth}, alpha: ${this.alpha}, opacity: ${this.opacity}, visible: ${this.isVisible}"
 
-fun Drawable.asStringPreKitkat() =
+internal fun Drawable.asStringPreKitkat() =
   "${this::class.java.simpleName}@${hashCode()}, bounds: ${this.bounds}, iHeight: ${this.intrinsicHeight}, iWidth: ${this.intrinsicWidth}, opacity: ${this.opacity}, visible: ${this.isVisible}"
 
-fun Any.asShortString() = "${this::class.java.simpleName}@${hashCode()}"
+internal fun Any.asShortString() = "${this::class.java.simpleName}@${hashCode()}"
 
-fun fromInt(ordinal: Int, default: WidgetPreset = WidgetPreset.values()[0])
+internal fun fromInt(ordinal: Int, default: WidgetPreset = WidgetPreset.values()[0])
   = WidgetPreset.values().find { it.ordinal == ordinal } ?: default
 
-fun fromInt(ordinal: Int, default: ColourTransition = ColourTransition.values()[0])
+internal fun fromInt(ordinal: Int, default: ColourTransition = ColourTransition.values()[0])
   = ColourTransition.values().find { it.ordinal == ordinal } ?: default
 
 
-//fun WidgetInterpolator.fromInt(ordinal: Int,
-//  default: WidgetInterpolator = WidgetInterpolator.values()[0]): WidgetInterpolator {
-//  WidgetInterpolator.values().filter { it.ordinal == ordinal }.forEach { return it }
+//internal fun WidgetInterpolator.fromInt(ordinal: Int,
+//  default: WidgetInterpolator = WidgetInterpolator.internal values()[0]): WidgetInterpolator {
+//  WidgetInterpolator.internal values().filter { it.ordinal == ordinal }.forEach { return it }
 //  return default
 //}
 
-fun TypedArray.getInt(@StyleableRes src: Int, defaultVal: Int) = getInt(src, defaultVal)
+internal fun TypedArray.getInt(@StyleableRes src: Int, defaultVal: Int) = getInt(src, defaultVal)
 //    .also { Log.d("AnimatedDropletWidget", getType(src)) }
 
-fun Int.toResourceEntryName(context: Context) =
+internal fun Int.toResourceEntryName(context: Context) =
   if (this != View.NO_ID) context.resources.getResourceEntryName(this) ?: "null" else "no-id"
 
-fun View.setSize(size: Pair<Width, Height>) = setSize(size.first, size.second)
+internal fun View.setSize(size: Pair<Width, Height>) = setSize(size.first, size.second)
 
-fun View.setSize(width: Int, height: Int) = this.layoutParams?.apply {
+internal fun View.setSize(width: Int, height: Int) = this.layoutParams?.apply {
   this.width = width
   this.height = height
   this@setSize.layoutParams = this
@@ -313,50 +311,50 @@ private fun View.setSizeSafe(width: Int, height: Int) {
   this.layoutParams = LayoutParams(width, height)
 }
 
-fun View.center(containerWidth: Int, containerHeight: Int) {
+internal fun View.center(containerWidth: Int, containerHeight: Int) {
   this.layoutParams?.let {
     x = (containerWidth - it.width) / 2f
     y = (containerHeight - it.height) / 2f
   } ?: throw RuntimeException()
 }
 
-fun ViewGroup.getChildren() = (0 until childCount).map { childIndex -> getChildAt(childIndex) }
+internal fun ViewGroup.getChildren() = (0 until childCount).map { childIndex -> getChildAt(childIndex) }
 
-val View.complexString
+internal val View.complexString
   get() = StringBuilder(2048).append(
     "${asShortString()}\n" + "\t${toString()}\n" + "\tid: $id, tag: $tag\n" + "\tvisibility: ${visibilityAsString()}, alpha: ${this.alpha}\n" + "\tbackground: ${background?.complexString}\n" + "\tpaddings (top, bot, left, right): ($paddingTop, $paddingBottom, $paddingLeft, $paddingRight)\n" + "\tframe: (top, bot, left, right): ($top, $bottom, $left, $right)\n" + "\tscale (x, y): ($scaleX, $scaleY)\n" + "\trotation: (x, y): ($rotationX, $rotationY)\n" + "\t(x, y): ($x, $y) layoutParams: ${layoutParams?.asString()}\n" + "\tmeasuredWidth: $measuredWidth, measuredHeight: $measuredHeight\n" + "\tanimation: $animation\n" + "\tparent: ${parent?.toString()}" +
         ""
   ).toString()
 
-val ImageView.complexString :String
+internal val ImageView.complexString :String
 get() = (this as View).complexString + "\timage: ${drawable?.complexString}\n"
 
-fun View.visibilityAsString() = when (visibility) {
+internal fun View.visibilityAsString() = when (visibility) {
   View.VISIBLE -> "visible"
   View.INVISIBLE -> "invisible"
   View.GONE -> "gone"
   else -> "UNKNOWN"
 }
 
-fun LayoutParams.asString() = "${asShortString()}, (width, height): ($width, $height)"
+internal fun LayoutParams.asString() = "${asShortString()}, (width, height): ($width, $height)"
 
 
-val LayoutParams.size: Pair<Width, Height>
+internal val LayoutParams.size: Pair<Width, Height>
   get() = Pair(this.width, this.height)
 
-val ViewGroup.size: Pair<Width, Height>
+internal val ViewGroup.size: Pair<Width, Height>
   get() = Pair(this.layoutParams.width, this.layoutParams.height)
 
 private val drawableForegroundRect = Rect()
-val Drawable.padding: Rect
+internal val Drawable.padding: Rect
   get() {
     getPadding(drawableForegroundRect)
     return drawableForegroundRect
   }
 
 
-val Drawable.complexString
+internal val Drawable.complexString
   get () = "(width, height): ($intrinsicWidth, $intrinsicHeight), bounds: ${this.bounds}"
 
-fun Dp.toPx(context: Context) =
+internal fun Dp.toPx(context: Context) =
   (this * context.resources.displayMetrics.density).toInt()
