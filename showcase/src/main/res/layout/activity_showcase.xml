@@ -27,6 +27,7 @@
       android:layout_marginTop="8dp" />
 
     <com.android.szparag.animateddropletwidgetshowcase.ScreenPickerView
+      android:id="@+id/screenPickerMaps"
       android:layout_width="match_parent"
       android:layout_height="300dp"
       app:background="@drawable/ic_action_microphone"
