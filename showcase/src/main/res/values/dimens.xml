@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+  <dimen name="mockSkypeAvatarPrimarySize">192dp</dimen>
+  <dimen name="mockSkypeAvatarPrimaryMargin">8dp</dimen>
+
+  <dimen name="mockSkypeAvatarSecondarySize">64dp</dimen>
+  <dimen name="mockSkypeAvatarSecondaryMargin">8dp</dimen>
+
+  <dimen name="mockSkypeLineSize">192dp</dimen>
+
+  <dimen name="mockSkypeTopPanelHeight">92dp</dimen>
+
+  <dimen name="mockSkypeButtonMargin">8dp</dimen>
+  <dimen name="mockSkypeButtonElevationSmall">2dp</dimen>
+  <dimen name="mockSkypeButtonElevationNormal">4dp</dimen>
+  <dimen name="mockSkypeButtonElevationBig">6dp</dimen>
+
+  <dimen name="mockSkypeButtonContainerMarginSides">4dp</dimen>
+
+  <dimen name="mockSkypeSecondaryAvatarsContainerPadding">4dp</dimen>
+
+</resources>
