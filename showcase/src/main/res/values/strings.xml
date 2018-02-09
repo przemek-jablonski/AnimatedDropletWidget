@@ -10,4 +10,15 @@
 
   <string name="showcase_screen_skype_shortcut_label">Skype screen</string>
   <string name="showcase_screen_skype_audiocall_description">Group Audio Call</string>
+
+  <string-array name="showcase_screen_assistant_encouragements">
+    <item>Make me do something</item>
+    <item>Just ask me</item>
+    <item>I\'m listening</item>
+    <item>Go ahead</item>
+    <item>I may be of use to you</item>
+    <item>Try speaking to me</item>
+  </string-array>
+
+
 </resources>

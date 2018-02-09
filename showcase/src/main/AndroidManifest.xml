@@ -9,7 +9,6 @@
     android:roundIcon="@mipmap/ic_launcher_round"
     android:supportsRtl="true"
     android:theme="@style/AppTheme">
-
     <activity
       android:name=".ShowcaseActivity"
       android:configChanges="keyboardHidden"
@@ -21,7 +20,6 @@
         <category android:name="android.intent.category.LAUNCHER" />
       </intent-filter>
     </activity>
-
     <activity
       android:name=".MockSkypeActivity"
       android:configChanges="keyboardHidden"
@@ -29,7 +27,6 @@
       android:resizeableActivity="false"
       android:screenOrientation="portrait"
       android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
-
     <activity
       android:name=".MockMapActivity"
       android:configChanges="keyboardHidden"
@@ -42,6 +39,8 @@
       android:name="preloaded_fonts"
       android:resource="@array/preloaded_fonts" />
 
+    <activity android:name=".MockDigitalAssistantActivity"
+      android:exported="true"></activity>
   </application>
 
 </manifest>

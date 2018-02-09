@@ -16,6 +16,8 @@ import java.util.*
 
 class MockMapActivity : BaseMockActivity() {
 
+  override val presetString = R.string.showcase_screen_skype_snackbar_content //todo: change that
+
   companion object IntentFactory {
     fun getStartingIntent(packageContext: Context) = Intent(packageContext, MockMapActivity::class.java)
   }

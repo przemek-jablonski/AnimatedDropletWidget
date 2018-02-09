@@ -11,6 +11,7 @@ class ShowcaseActivity : AppCompatActivity() {
     setContentView(R.layout.activity_showcase)
     screenPickerSkype.setOnClickListener { startActivity(MockSkypeActivity.getStartingIntent(this)) }
     screenPickerMaps.setOnClickListener { startActivity(MockMapActivity.getStartingIntent(this)) }
+    screenPickerDigitalAssistant.setOnClickListener { startActivity(MockDigitalAssistantActivity.getStartingIntent(this)) }
   }
 
 }

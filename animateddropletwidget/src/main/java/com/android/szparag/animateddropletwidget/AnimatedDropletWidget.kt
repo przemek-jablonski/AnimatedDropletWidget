@@ -169,7 +169,15 @@ open class AnimatedDropletWidget : FrameLayout {
   //todo: callbacks: onBackgroundLayerAnimationStarted() / onDropletLayerAnimationStarted()
   //todo: internal animation values should be stored as fields and shared between animations (with some multiplier)
 
-  enum class WidgetPreset { NONE, DROPLETS, FLOW, RADAR, IRREGULAR, BREATH, RANDOM }
+  enum class WidgetPreset {
+    NONE,
+    DROPLETS, //droplets and background
+    FLOW,
+    RADAR, //just droplets
+    IRREGULAR,
+    BREATH, //just background, semi-regular
+    RANDOM
+  }
 
   enum class ColourTransition {
     FORWARD, BACKWARD, RANDOM;
@@ -223,12 +231,15 @@ open class AnimatedDropletWidget : FrameLayout {
   }
 
   override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+    val widthMeasureSpecVal = MeasureSpec.getSize(widthMeasureSpec)
+    val heightMeasureSpecVal = MeasureSpec.getSize(heightMeasureSpec)
+    val squareMeasureSpec = if (widthMeasureSpecVal > heightMeasureSpecVal) heightMeasureSpec else widthMeasureSpec
     var maxHeight = 0
     var maxWidth = 0
     var childState = 0
 
     getChildren().forEach { child ->
-      measureChildWithMargins(child, widthMeasureSpec, 0, heightMeasureSpec, 0)
+      measureChildWithMargins(child, squareMeasureSpec, 0, squareMeasureSpec, 0)
       val params = child.layoutParams as LayoutParams
       maxWidth = Math.max(maxWidth, child.measuredWidth + params.leftMargin + params.rightMargin)
       maxHeight = Math.max(maxHeight, child.measuredHeight + params.topMargin + params.bottomMargin)
@@ -242,10 +253,12 @@ open class AnimatedDropletWidget : FrameLayout {
 
     //applying measurement dimensions to parent (AnimatedDropletWidget)
     setMeasuredDimension(
-      min(
-        View.resolveSizeAndState(maxWidth, widthMeasureSpec, childState),
-        View.resolveSizeAndState(maxHeight, heightMeasureSpec, childState shl MEASURED_HEIGHT_STATE_SHIFT)
-      )
+      View.resolveSizeAndState(min(maxWidth, maxHeight), squareMeasureSpec, childState)
+//      ,
+//      min(
+//        View.resolveSizeAndState(maxWidth, squareMeasureSpec, childState),
+//        View.resolveSizeAndState(maxHeight, squareMeasureSpec, childState shl MEASURED_HEIGHT_STATE_SHIFT)
+//      )
     )
 
     //applying measurement dimensions to children (background layers)
@@ -720,7 +733,11 @@ open class AnimatedDropletWidget : FrameLayout {
   }
 
   //todo: as extension?
-  private fun setMeasuredDimension(commonDimension: Int) = setMeasuredDimension(commonDimension, commonDimension)
+  private fun setMeasuredDimension(commonDimension: Int) =
+    setMeasuredDimension(commonDimension, commonDimension)
+
+  private fun measureChildWithMargins(child: View, commonDimension: Int) =
+    measureChildWithMargins(child, commonDimension, 0, commonDimension, 0)
 
   private fun printViewAttributes() = StringBuilder(1024).append(
     "drawableSrc: ${drawableSrc.toResourceEntryName(

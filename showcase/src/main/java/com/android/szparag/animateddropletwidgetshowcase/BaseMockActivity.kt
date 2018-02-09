@@ -12,12 +12,19 @@ typealias ResourceId = Int
 
 abstract class BaseMockActivity : AppCompatActivity() {
 
+  abstract val presetString: ResourceId
+
   @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
   protected fun setStatusAndNavigationBarColour(@ColorRes statusBarColour: ResourceId, @ColorRes navigationBarColour: ResourceId? = statusBarColour) {
     window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
     window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
     navigationBarColour?.let { window.navigationBarColor = resources.getColor(navigationBarColour) }
     window.statusBarColor = resources.getColor(statusBarColour)
+  }
+
+  override fun onStart() {
+    super.onStart()
+    showPresetSnackbar(presetString)
   }
 
   protected fun showPresetSnackbar(@StringRes stringRes: ResourceId) {

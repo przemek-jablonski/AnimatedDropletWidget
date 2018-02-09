@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit
 class MockSkypeActivity : BaseMockActivity() {
 
   private lateinit var callTimerDisposable: Disposable
+  override val presetString = R.string.showcase_screen_skype_snackbar_content
 
   companion object IntentFactory {
     fun getStartingIntent(packageContext: Context) = Intent(packageContext, MockSkypeActivity::class.java)
@@ -33,11 +34,6 @@ class MockSkypeActivity : BaseMockActivity() {
         .subscribeBy { seconds -> setCallDurationTimeTextView(seconds) }
   }
 
-
-  override fun onStart() {
-    super.onStart()
-    showPresetSnackbar(R.string.showcase_screen_skype_snackbar_content)
-  }
 
   override fun onDestroy() {
     super.onDestroy()
