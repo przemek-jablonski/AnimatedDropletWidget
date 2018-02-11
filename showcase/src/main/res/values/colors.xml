@@ -55,6 +55,15 @@
   <color name="mockDigitalAssistantWhite">#f5f5f5</color>
   <color name="mockDigitalAssistantGrey">#bdbdbd</color>
 
+  <color name="mockSportsTrackerBlack">#212121</color>
+
+  <color name="mockSportsTrackerGrey">#424242</color>
+  <color name="mockSportsTrackerLightGrey">#757575</color>
+
+  <color name="mockSportsTrackerPrimaryColour">#ee964b</color>
+  <color name="mockSportsTrackerSecondaryColour">#19647E</color>
+  <color name="mockSportsTrackerTertiaryColour">#99C24D</color>
+
   <!--<color name="mock_skype_background_primary">#0277bd</color>-->
   <!--<color name="mock_skype_background_secondary">#6969B3</color>-->
 
