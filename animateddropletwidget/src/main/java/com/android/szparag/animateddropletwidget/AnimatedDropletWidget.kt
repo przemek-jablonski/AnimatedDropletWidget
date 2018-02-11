@@ -303,7 +303,7 @@ open class AnimatedDropletWidget : FrameLayout {
     printViewParentAndChildren()
     constructDrawables()
     constructAnimations()
-    startAnimations()
+//    startAnimations()
 //    Single.timer(1000, TimeUnit.MILLISECONDS).subscribeBy(onSuccess = {
 //      printViewParentAndChildren()
 //    })
@@ -582,8 +582,8 @@ open class AnimatedDropletWidget : FrameLayout {
 
   //<editor-fold desc="Start animations on each children">
   private fun startAnimations() {
-    startBackgroundLayersAnimations()
-    startDropletLayersAnimations()
+//    startBackgroundLayersAnimations()
+//    startDropletLayersAnimations()
   }
 
   private fun startBackgroundLayersAnimations() {
@@ -594,7 +594,6 @@ open class AnimatedDropletWidget : FrameLayout {
     circularDropletsLayers.forEach { animation?.start() }
   }
   //</editor-fold
-
 
   //<editor-fold desc="AnimationSet construction wrappers">
   private fun animateCircularBackground(targetView: View, duration: Millis, startTime: Millis, repeatDelay: Millis,
@@ -700,6 +699,41 @@ open class AnimatedDropletWidget : FrameLayout {
     }
   //</editor-fold>
 
+  public fun start() {
+    startBackgroundLayersAnimations()
+    startDropletLayersAnimations()
+  }
+
+  public fun stop() {
+//    clearAnimation()
+    getChildren().forEach {
+      animation?.cancel()
+      clearAnimation()
+      animation?.setAnimationListener(null)
+      animate().cancel()
+//      animation.reset()
+//      animation.cancel()
+//      animation = null
+    }
+    circularBackgroundLayers.forEach {
+      animation?.cancel()
+      clearAnimation()
+      animation?.setAnimationListener(null)
+      animate().cancel()
+    }
+    circularDropletsLayers.forEach {
+      animation?.cancel()
+      clearAnimation()
+      animation?.setAnimationListener(null)
+      animate().cancel()
+    }
+    oneShotDropletView?.let {
+      animation?.cancel()
+      clearAnimation()
+      animation?.setAnimationListener(null)
+      animate().cancel()
+    }
+  }
 
   //proven that this feels good on the ui with serious laboratory testing. true story
   private fun generateDropletBackgroundPath(random: Random, randomFactor: Float = 0.005f) = Path().apply {

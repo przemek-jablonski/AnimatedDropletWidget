@@ -50,6 +50,8 @@
   <color name="mockGoogleBlueTransparent">#a2304ffe</color>
 
   <color name="mockDigitalAssistantRed">#d50000</color>
+  <color name="mockDigitalAssistantRedLight">#afd50000</color>
+  <color name="mockDigitalAssistantRedLighter">#64d50000</color>
   <color name="mockDigitalAssistantWhite">#f5f5f5</color>
   <color name="mockDigitalAssistantGrey">#bdbdbd</color>
 
