@@ -2,6 +2,8 @@ package com.android.szparag.animateddropletwidgetshowcase
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import io.reactivex.Flowable
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -20,13 +22,33 @@ class MockSportsTrackerActivity : BaseMockActivity() {
   private var milesTimerDisposable: Disposable? = null
   private var caloriesCount = 0f
   private var milesCount = 0f
+  private var workoutActive = false
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_mock_sports_tracker)
-    startStopwatchTimer()
-    startCaloriesTimer()
-    startMilesTimer()
+    startWorkoutImageView.setOnClickListener { triggerWorkout() }
+    startWorkoutTextView.setOnClickListener { triggerWorkout() }
+    setStopwatchText()
+    setCaloriesText()
+    setMilesText()
+  }
+
+  private fun triggerWorkout() {
+    if (workoutActive) {
+      topGradientView.visibility = GONE
+      bottomGradientView.visibility = GONE
+      timeProgressBar.visibility = GONE
+      disposeTimers()
+    } else {
+      topGradientView.visibility = VISIBLE
+      bottomGradientView.visibility = VISIBLE
+      timeProgressBar.visibility = VISIBLE
+      startStopwatchTimer()
+      startCaloriesTimer()
+      startMilesTimer()
+    }
+    workoutActive = !workoutActive
   }
 
   override fun onDestroy() {
@@ -43,6 +65,7 @@ class MockSportsTrackerActivity : BaseMockActivity() {
           .onBackpressureDrop()
           .observeOn(AndroidSchedulers.mainThread())
           .doOnSubscribe { setStopwatchText() }
+          .doOnCancel { setStopwatchText() }
           .subscribe { milliseconds -> setStopwatchText(milliseconds) }
   }
 
@@ -56,6 +79,10 @@ class MockSportsTrackerActivity : BaseMockActivity() {
           .interval(5, TimeUnit.SECONDS)
           .observeOn(AndroidSchedulers.mainThread())
           .doOnSubscribe { setCaloriesText() }
+          .doOnDispose {
+            caloriesCount = 0f
+            setCaloriesText()
+          }
           .subscribe {
             caloriesCount += (max(0.00, random.nextGaussian()) * 1f).toFloat()
             setCaloriesText(caloriesCount)
@@ -71,10 +98,19 @@ class MockSportsTrackerActivity : BaseMockActivity() {
           .interval(1, TimeUnit.SECONDS)
           .observeOn(AndroidSchedulers.mainThread())
           .doOnSubscribe { setMilesText() }
+          .doOnDispose {
+            milesCount = 0f
+            setMilesText() }
           .subscribe {
             milesCount += (max(0.00, random.nextGaussian()) * 0.0025f).toFloat()
             setMilesText(milesCount)
           }
+  }
+
+  private fun disposeTimers() {
+    stopwatchTimerDisposable?.dispose()
+    caloriesTimerDisposable?.dispose()
+    milesTimerDisposable?.dispose()
   }
 
   @SuppressLint("SetTextI18n")
