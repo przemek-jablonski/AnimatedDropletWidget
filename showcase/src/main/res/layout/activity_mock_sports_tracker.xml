@@ -18,7 +18,7 @@
     android:alpha="0.2"
     android:id="@+id/topGradientView"
     android:visibility="gone"
-    tools:visibility="visible"/>
+    tools:visibility="visible" />
 
   <View
     android:layout_width="0dp"
@@ -32,6 +32,20 @@
     android:id="@+id/bottomGradientView"
     android:visibility="gone"
     tools:visibility="visible" />
+
+  <com.android.szparag.animateddropletwidget.AnimatedDropletWidget
+    android:layout_width="0dp"
+    android:layout_height="0dp"
+    app:layout_constraintEnd_toEndOf="@id/guideline5"
+    android:layout_marginEnd="16dp"
+    app:global_colour="@color/mockSportsTrackerPrimaryColour"
+    app:drawable_size="0"
+    app:layout_constraintStart_toStartOf="@id/guideline15"
+    android:layout_marginStart="16dp"
+    app:layout_constraintBottom_toTopOf="@id/guideline18"
+    app:layout_constraintTop_toBottomOf="@id/guideline19"
+    app:layout_constraintDimensionRatio="1:1"
+    android:id="@+id/milesAnimation" />
 
   <ImageView
     android:layout_width="0dp"
@@ -238,7 +252,7 @@
     android:layout_height="wrap_content"
     android:id="@+id/guideline5"
     android:orientation="vertical"
-    app:layout_constraintGuide_percent="0.93" />
+    app:layout_constraintGuide_percent="0.9318735" />
 
   <android.support.constraint.Guideline
     android:layout_width="wrap_content"

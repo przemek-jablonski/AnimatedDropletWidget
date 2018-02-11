@@ -38,6 +38,12 @@ class MockSportsTrackerActivity : BaseMockActivity() {
     setMilesText()
   }
 
+  override fun onResume() {
+    super.onResume()
+    val asd = 2
+    val apf = 3
+  }
+
   private fun triggerWorkout() {
     if (!workoutActive) showWorkout() else hideWorkout()
     workoutActive = !workoutActive
