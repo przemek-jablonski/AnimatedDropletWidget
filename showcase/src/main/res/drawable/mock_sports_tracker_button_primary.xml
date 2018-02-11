@@ -3,7 +3,7 @@
   android:shape="oval">
 
   <stroke android:color="@color/mockSportsTrackerPrimaryColour"
-    android:width="3px"/>
+    android:width="3dp"/>
 
   <solid android:color="@color/mockSportsTrackerGrey"/>
 
