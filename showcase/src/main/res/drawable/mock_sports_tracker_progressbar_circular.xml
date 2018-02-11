@@ -8,6 +8,6 @@
     android:thickness="3dp"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <solid android:color="@color/mockSportsTrackerPrimaryColour"/>
+    <solid android:color="@color/mockSportsTrackerPrimaryColourAlpha1"/>
   </shape>
 </rotate>

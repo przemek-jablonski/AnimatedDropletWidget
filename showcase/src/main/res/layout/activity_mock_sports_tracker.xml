@@ -146,7 +146,7 @@
     android:indeterminate="true"
     android:indeterminateTint="@color/mockSportsTrackerPrimaryColour"
     android:indeterminateDrawable="@drawable/mock_sports_tracker_progressbar_circular"
-    android:indeterminateDuration="5000"
+    android:indeterminateDuration="1000"
     android:visibility="gone"
     tools:visibility="visible"
     tools:progress="50"
