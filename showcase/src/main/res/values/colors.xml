@@ -61,6 +61,7 @@
   <color name="mockSportsTrackerLightGrey">#757575</color>
 
   <color name="mockSportsTrackerPrimaryColour">#ee964b</color>
+  <color name="mockSportsTrackerPrimaryColourAlpha">#37ee964b</color>
   <color name="mockSportsTrackerSecondaryColour">#19647E</color>
   <color name="mockSportsTrackerTertiaryColour">#99C24D</color>
 

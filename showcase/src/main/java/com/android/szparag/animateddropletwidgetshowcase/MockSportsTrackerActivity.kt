@@ -2,8 +2,8 @@ package com.android.szparag.animateddropletwidgetshowcase
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.view.View.GONE
-import android.view.View.VISIBLE
+import android.view.animation.AccelerateInterpolator
+import android.view.animation.DecelerateInterpolator
 import io.reactivex.Flowable
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -12,6 +12,10 @@ import kotlinx.android.synthetic.main.activity_mock_sports_tracker.*
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.math.max
+
+private const val STOPWATCH_TIMER_UPDATE_TIME: Millis = 1
+private const val CALORIES_TIMER_UPDATE_TIME: Seconds = 5
+private const val MILES_TIMER_UPDATE_TIME: Seconds = 1
 
 class MockSportsTrackerActivity : BaseMockActivity() {
 
@@ -35,20 +39,24 @@ class MockSportsTrackerActivity : BaseMockActivity() {
   }
 
   private fun triggerWorkout() {
-    if (workoutActive) {
-      topGradientView.visibility = GONE
-      bottomGradientView.visibility = GONE
-      timeProgressBar.visibility = GONE
-      disposeTimers()
-    } else {
-      topGradientView.visibility = VISIBLE
-      bottomGradientView.visibility = VISIBLE
-      timeProgressBar.visibility = VISIBLE
-      startStopwatchTimer()
-      startCaloriesTimer()
-      startMilesTimer()
-    }
+    if (!workoutActive) showWorkout() else hideWorkout()
     workoutActive = !workoutActive
+  }
+
+  private fun showWorkout() {
+    topGradientView fadeInWith AccelerateInterpolator()
+    bottomGradientView fadeInWith AccelerateInterpolator()
+    timeProgressBar fadeInWith AccelerateInterpolator()
+    startStopwatchTimer()
+    startCaloriesTimer()
+    startMilesTimer()
+  }
+
+  private fun hideWorkout() {
+    topGradientView fadeOutWith DecelerateInterpolator()
+    bottomGradientView fadeOutWith DecelerateInterpolator()
+    timeProgressBar fadeOutWith DecelerateInterpolator()
+    disposeTimers()
   }
 
   override fun onDestroy() {
@@ -61,7 +69,7 @@ class MockSportsTrackerActivity : BaseMockActivity() {
   private fun startStopwatchTimer() {
     stopwatchTimerDisposable =
         Flowable
-          .interval(1, TimeUnit.MILLISECONDS)
+          .interval(STOPWATCH_TIMER_UPDATE_TIME, TimeUnit.MILLISECONDS)
           .onBackpressureDrop()
           .observeOn(AndroidSchedulers.mainThread())
           .doOnSubscribe { setStopwatchText() }
@@ -76,7 +84,7 @@ class MockSportsTrackerActivity : BaseMockActivity() {
   private fun startCaloriesTimer() {
     caloriesTimerDisposable =
         Observable
-          .interval(5, TimeUnit.SECONDS)
+          .interval(CALORIES_TIMER_UPDATE_TIME, TimeUnit.SECONDS)
           .observeOn(AndroidSchedulers.mainThread())
           .doOnSubscribe { setCaloriesText() }
           .doOnDispose {
@@ -95,12 +103,13 @@ class MockSportsTrackerActivity : BaseMockActivity() {
   private fun startMilesTimer() {
     milesTimerDisposable =
         Observable
-          .interval(1, TimeUnit.SECONDS)
+          .interval(MILES_TIMER_UPDATE_TIME, TimeUnit.SECONDS)
           .observeOn(AndroidSchedulers.mainThread())
           .doOnSubscribe { setMilesText() }
           .doOnDispose {
             milesCount = 0f
-            setMilesText() }
+            setMilesText()
+          }
           .subscribe {
             milesCount += (max(0.00, random.nextGaussian()) * 0.0025f).toFloat()
             setMilesText(milesCount)
@@ -116,9 +125,9 @@ class MockSportsTrackerActivity : BaseMockActivity() {
   @SuppressLint("SetTextI18n")
   private fun setStopwatchText(millisecondsElapsed: Long = 0L) {
     val millis = millisecondsElapsed.rem(1000)
-    val seconds = (millisecondsElapsed / 1000).rem(60)
-    val minutes = (millisecondsElapsed / 1000 / 60).rem(60)
-    val hours = (millisecondsElapsed / 1000 / 60 / 60).rem(12)
+    val seconds = millisecondsElapsed.toSeconds().rem(60)
+    val minutes = millisecondsElapsed.toMinutes().rem(60)
+    val hours = millisecondsElapsed.toHours().rem(12)
     timeContentTextView.text = "${String.format("%01d", hours)}:${String.format("%02d", minutes)}" +
         ":${String.format("%02d", seconds)}.${String.format("%03d", millis)}\n"
   }

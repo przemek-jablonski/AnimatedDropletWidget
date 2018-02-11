@@ -1,12 +1,12 @@
 package com.android.szparag.animateddropletwidgetshowcase
 
-import android.animation.Animator
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.DisplayMetrics
-import android.view.View
+import android.view.animation.AccelerateInterpolator
+import android.view.animation.DecelerateInterpolator
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
@@ -16,9 +16,9 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.math.max
 
-typealias Seconds = Long
-
+private const val ENCOURAGEMENT_TEXT_UPDATE_TIME: Seconds = 1
 private const val ENCOURAGEMENT_TEXT_SWITCH_TIME: Seconds = 10
+private const val ANIMATION_SIZE_SCREEN_OFFSET = 0.20F
 
 class MockDigitalAssistantActivity : BaseMockActivity() {
 
@@ -43,61 +43,37 @@ class MockDigitalAssistantActivity : BaseMockActivity() {
   }
 
   private fun setAnimationSize(displayMetrics: DisplayMetrics) {
-    val animationLayoutParams = microphoneAnimation.layoutParams
-    val maxDimen = max(displayMetrics.widthPixels, displayMetrics.heightPixels) * 1.15f
-    animationLayoutParams.width = maxDimen.toInt()
-    animationLayoutParams.height = maxDimen.toInt()
-    microphoneAnimation.layoutParams = animationLayoutParams
+    microphoneAnimation.changeSize(
+      (max(displayMetrics.widthPixels, displayMetrics.heightPixels) * (1.00f + ANIMATION_SIZE_SCREEN_OFFSET)).toInt()
+    )
     microphoneAnimation.invalidate()
   }
 
   private fun setupEncouragementTextSwitchTimer() {
     encouragementStringDisposable = Observable
-      .interval(1, TimeUnit.SECONDS)
+      .interval(ENCOURAGEMENT_TEXT_UPDATE_TIME, TimeUnit.SECONDS)
       .observeOn(AndroidSchedulers.mainThread())
       .map { totalSeconds -> totalSeconds.rem(ENCOURAGEMENT_TEXT_SWITCH_TIME) }
       .doOnSubscribe { encouragementTextView.text = encouragementStrings[encouragementStringIndex] }
-      .doOnDispose { encouragementTextView.text = "" }
+      .doOnDispose { encouragementTextView.text = emptyString() }
       .subscribeBy { seconds ->
-      if (seconds == 0L) {
-        encouragementTextSwitch()
-      } else {
-        encouragementTextAppendDot()
+        if (seconds == 0L) encouragementTextSwitch() else encouragementTextAppendDot()
       }
-    }
   }
 
   private fun triggerAnimation() {
-    if (animationVisible) hideAnimations()
-    else showAnimations()
-
+    if (!animationVisible) showAnimations() else hideAnimations()
     animationVisible = !animationVisible
   }
 
   private fun hideAnimations() {
     encouragementStringDisposable.dispose()
-    microphoneAnimation.animate().alpha(0f).setListener(object : Animator.AnimatorListener {
-      override fun onAnimationRepeat(animation: Animator?) {}
-      override fun onAnimationEnd(animation: Animator?) {
-        microphoneAnimation.visibility = View.INVISIBLE
-      }
-
-      override fun onAnimationCancel(animation: Animator?) {}
-      override fun onAnimationStart(animation: Animator?) {}
-    }).start()
+    microphoneAnimation fadeOutWith AccelerateInterpolator()
   }
 
   private fun showAnimations() {
     setupEncouragementTextSwitchTimer()
-    microphoneAnimation.animate().alpha(1f).setListener(object : Animator.AnimatorListener {
-      override fun onAnimationRepeat(animation: Animator?) {}
-      override fun onAnimationEnd(animation: Animator?) {}
-      override fun onAnimationCancel(animation: Animator?) {}
-      override fun onAnimationStart(animation: Animator?) {
-        microphoneAnimation.alpha = 0f
-        microphoneAnimation.visibility = View.VISIBLE
-      }
-    }).start()
+    microphoneAnimation fadeInWith DecelerateInterpolator()
   }
 
   private fun encouragementTextSwitch() {
@@ -112,11 +88,6 @@ class MockDigitalAssistantActivity : BaseMockActivity() {
   }
 
 
-  private fun shiftEncouragementStringsArray(array: List<String>, random: Random) {
-    val shift = random.nextInt(array.size - 1) + 1
-    val shiftedArray = array.toMutableList()
-    for (i in 0 until array.size) {
-      shiftedArray[i] = array[(i + shift).rem(array.size)]
-    }
-  }
+  private fun shiftEncouragementStringsArray(array: List<String>, random: Random) =
+    array shiftIndexesBy random.nextInt(array.size - 1) + 1
 }
