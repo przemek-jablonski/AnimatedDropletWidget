@@ -17,6 +17,7 @@
       <enum name="breath" value="5" />
     </attr>
 
+    <attr format="reference" name="global_layers_count" />
     <attr format="integer" name="droplets_layers_count" />
     <attr format="integer" name="background_layers_count" />
     <attr format="integer" name="oneshot_count" />

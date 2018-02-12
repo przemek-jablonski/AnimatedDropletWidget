@@ -188,7 +188,8 @@
     app:layout_constraintTop_toTopOf="@id/guideline8"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintBottom_toBottomOf="@id/guideline7">
+    app:layout_constraintBottom_toBottomOf="@id/guideline7"
+    android:gravity="center">
 
     <android.support.design.widget.FloatingActionButton
       android:id="@+id/buttonAddPeople"
