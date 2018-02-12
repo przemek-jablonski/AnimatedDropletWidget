@@ -20,7 +20,6 @@
     <attr format="reference" name="global_layers_count" />
     <attr format="integer" name="droplets_layers_count" />
     <attr format="integer" name="background_layers_count" />
-    <attr format="integer" name="oneshot_count" />
 
     <attr format="float" name="global_random_influence" />
     <attr format="integer" name="global_max_duration_ms" />

@@ -40,8 +40,6 @@ class MockSportsTrackerActivity : BaseMockActivity() {
 
   override fun onResume() {
     super.onResume()
-    val asd = 2
-    val apf = 3
   }
 
   private fun triggerWorkout() {
@@ -53,6 +51,7 @@ class MockSportsTrackerActivity : BaseMockActivity() {
     topGradientView fadeInWith AccelerateInterpolator()
     bottomGradientView fadeInWith AccelerateInterpolator()
     timeProgressBar fadeInWith AccelerateInterpolator()
+    milesAnimation.startOneshot()
     startStopwatchTimer()
     startCaloriesTimer()
     startMilesTimer()

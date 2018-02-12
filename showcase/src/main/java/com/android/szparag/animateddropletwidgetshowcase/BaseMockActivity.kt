@@ -27,10 +27,8 @@ abstract class BaseMockActivity : AppCompatActivity() {
     showPresetSnackbar(presetString)
   }
 
-  protected fun showPresetSnackbar(@StringRes stringRes: ResourceId) {
-    Snackbar
-        .make(findViewById(android.R.id.content), resources.getString(stringRes), Snackbar.LENGTH_LONG)
-        .show()
+  private fun showPresetSnackbar(@StringRes stringRes: ResourceId) {
+    Snackbar.make(findViewById(android.R.id.content), resources.getString(stringRes), Snackbar.LENGTH_LONG).show()
   }
 
 }

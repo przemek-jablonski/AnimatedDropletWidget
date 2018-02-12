@@ -41,7 +41,7 @@ typealias Factor = Float
 private const val ATTRS_GLOBAL_LAYERS_COUNT = 2
 private const val ATTRS_DROPLET_COUNT = ATTRS_GLOBAL_LAYERS_COUNT * 2
 private const val ATTRS_BACKGROUND_LAYERS_COUNT = ATTRS_GLOBAL_LAYERS_COUNT
-private const val ATTRS_ONESHOT_COUNT = ATTRS_GLOBAL_LAYERS_COUNT / 2
+//private const val ATTRS_ONESHOT_COUNT = ATTRS_GLOBAL_LAYERS_COUNT / 2
 private const val ATTRS_GLOBAL_RANDOM_INFLUENCE: Factor = 1.00F
 private const val ATTRS_GLOBAL_MAX_DURATION: Millis = 5000 //todo: BASE_ANIMATION_LENGTH_MILLIS?
 private const val ATTRS_GLOBAL_PRIMARY_COLOUR: ResourceId = color.holo_red_dark
@@ -91,7 +91,7 @@ private const val DRAWABLE_DROPLET_INTERNAL_MARGIN: Dp = DRAWABLES_BASE_INTERNAL
 //private const val TAG_INDEX = 1337
 private const val TAG_BACKGROUND_VAL = "BACKGROUND"
 private const val TAG_DROPLET_VAL = "DROPLET"
-//private const val TAG_ONESHOT_VAL = "ONESHOT"
+private const val TAG_ONESHOT_VAL = "ONESHOT"
 private const val TAG_DRAWABLE_VAL = "DRAWABLE"
 
 private const val BACKGROUND_DURATION_BASE_RANDOM_FACTOR: Factor = 0.05F
@@ -107,7 +107,11 @@ private const val DROPLETS_REPEATDELAY_BASE_RANDOM_FACTOR: Factor = DROPLETS_DUR
 private const val DROPLETS_STARTTIME_BASE_RANDOM_FACTOR: Factor = DROPLETS_DURATION_BASE_RANDOM_FACTOR / 4F
 private const val DROPLETS_ENDSIZE_BASE_RANDOM_FACTOR: Factor = 0.05F
 private const val DROPLETS_SPAWNSIZE_BASE_RANDOM_FACTOR: Factor = 0.05F
-private const val DROPLETS_DURATION_MINIMUM_FACTOR: Factor = 0.60F
+
+
+private const val DURATION_MINIMUM_FACTOR: Factor = 0.60F
+
+//private const val  =
 
 private const val PRESET_BREATH_DURATION: Millis = 5000
 
@@ -133,7 +137,7 @@ open class AnimatedDropletWidget : FrameLayout {
 
   private var dropletsLayersCount = ATTRS_DROPLET_COUNT
   private var backgroundLayersCount = ATTRS_BACKGROUND_LAYERS_COUNT
-  private var oneshotLayersCount = ATTRS_ONESHOT_COUNT
+  //  private var oneshotLayersCount = 2
   private var globalRandomInfluence: Factor = INVALID_FACTOR
 //  private var globalMaxDuration: Millis = ATTRS_GLOBAL_MAX_DURATION
 //  private var globalColour = ATTRS_GLOBAL_PRIMARY_COLOUR
@@ -316,10 +320,14 @@ open class AnimatedDropletWidget : FrameLayout {
 
   //<editor-fold desc="Applying and validating xml attributes">
   private fun applyPresetAttributes(attrs: TypedArray) {
-    preset = fromInt(attrs.getInt(R.styleable.AnimatedDropletWidget_preset, preset.ordinal), NONE)
+    preset = fromInt(
+      attrs.getInt(R.styleable.AnimatedDropletWidget_preset, preset.ordinal),
+      NONE
+    ) //todo: not NONE if attr is missing
     when (preset) {
       NONE -> {
-        return
+        backgroundLayersCount = 0
+        dropletsLayersCount = 0
       }
       DROPLETS -> {
 
@@ -352,11 +360,11 @@ open class AnimatedDropletWidget : FrameLayout {
   }
 
   private fun applyGlobalAttributes(attrs: TypedArray) {
-    attrs.getInt(R.styleable.AnimatedDropletWidget_global_layers_count, ATTRS_GLOBAL_LAYERS_COUNT)
-      .apply {
+    attrs.getInt(R.styleable.AnimatedDropletWidget_global_layers_count, INVALID_RESOURCE_ID)
+      .takeUnless { it == INVALID_RESOURCE_ID }
+      ?.apply {
         backgroundLayersCount = this
         dropletsLayersCount = this
-        oneshotLayersCount = this
       }
 
     attrs.getFloat(R.styleable.AnimatedDropletWidget_global_random_influence, ATTRS_GLOBAL_RANDOM_INFLUENCE)
@@ -425,7 +433,6 @@ open class AnimatedDropletWidget : FrameLayout {
         attrs.getInt(R.styleable.AnimatedDropletWidget_background_layers_count, backgroundLayersCount)
     dropletsLayersCount =
         attrs.getInt(R.styleable.AnimatedDropletWidget_droplets_layers_count, dropletsLayersCount)
-    oneshotLayersCount = attrs.getInt(R.styleable.AnimatedDropletWidget_oneshot_count, oneshotLayersCount)
   }
 
   private fun validateCustomAttributes() {
@@ -464,7 +471,7 @@ open class AnimatedDropletWidget : FrameLayout {
   }
 
   private fun constructDropletOneshot() {
-    //...
+    oneShotDropletView = ImageView(context).apply { tag = TAG_ONESHOT_VAL }
   }
 
   @Suppress("DEPRECATION")
@@ -492,6 +499,7 @@ open class AnimatedDropletWidget : FrameLayout {
   private fun constructDrawables() {
     setDrawableForBackgroundLayers(measuredWidth, measuredHeight)
     setDrawableForDropletLayers(measuredWidth, measuredHeight)
+    setDrawableForOneshotView(measuredWidth, measuredHeight)
   }
 
   private fun setDrawableForBackgroundLayers(width: Int, height: Int) {
@@ -514,6 +522,13 @@ open class AnimatedDropletWidget : FrameLayout {
     circularDropletsLayers.forEach { layer ->
       layer as ImageView
       layer.setImageDrawable(createCircularDropletDrawable(width, height, dropletsThickness, dropletsColour))
+    }
+  }
+
+  private fun setDrawableForOneshotView(width: Int, height: Int) {
+    oneShotDropletView?.let { view ->
+      view as ImageView
+      view.setImageDrawable(createCircularDropletDrawable(width, height, dropletsThickness, dropletsColour))
     }
   }
 
@@ -553,6 +568,7 @@ open class AnimatedDropletWidget : FrameLayout {
       fadeout = dropletsFadeout,
       randomFactor = globalRandomInfluence
     )
+
   }
 
   private fun constructBackgroundLayersAnimations(maxDuration: Millis, endsizeMin: Percentage, endsizeMax: Percentage,
@@ -584,7 +600,7 @@ open class AnimatedDropletWidget : FrameLayout {
   private fun constructDropletLayersAnimations(maxDuration: Millis, spawnSize: Percentage, endsizeMin: Percentage,
     endsizeMax: Percentage, fadeout: Factor, randomFactor: Float) {
     //todo: distribution and random is not used
-    val minDuration = (DROPLETS_DURATION_MINIMUM_FACTOR * maxDuration).toLong()
+    val minDuration = (DURATION_MINIMUM_FACTOR * maxDuration).toLong()
     var lerpFactor: Float
     var actualDuration: Millis
     circularDropletsLayers.forEachIndexed { index, layer ->
@@ -606,6 +622,20 @@ open class AnimatedDropletWidget : FrameLayout {
           random, DROPLETS_ENDSIZE_BASE_RANDOM_FACTOR * randomFactor
         ).clamp(0, 100),
         fadeout = fadeout
+      )
+    }
+  }
+
+  private fun constructOneshotAnimation(maxDuration: Millis, endSize: Percentage) {
+    circularDropletsLayers.forEachIndexed { index, layer ->
+      animateCircularDroplet(
+        targetView = layer,
+        duration = maxDuration,
+        startTime = 0L,
+        repeatDelay = 0L,
+        spawnSize = 0,
+        endSize = endSize,
+        fadeout = 1f
       )
     }
   }
@@ -697,7 +727,52 @@ open class AnimatedDropletWidget : FrameLayout {
       set.attach(targetView)
     }
   }
+
+  private fun animateOneshot(targetView: View, endSize: Percentage) {
+    AnimationSet(false).also { set ->
+      set.fillAfter = true
+      set.isFillEnabled = true
+      set.addAnimation(
+        createScalingAnimation(
+          parentContainer = this,
+          duration = dropletsMaxDuration,
+          startTime = 0,
+          repeatDelay = 0,
+          xyStart = 0f,
+          xyEnd = endSize / 100f,
+          interpolator = AnticipateOvershootInterpolator(1.05f),
+          timeCutoff = 0.95f,
+          oneShot = true
+        )
+      )
+      set.addAnimation(
+        createFadeoutAnimation(
+          parentContainer = this,
+          duration = dropletsMaxDuration,
+          repeatDelay = 0,
+          startTime = 0,
+          alphaStart = 1.00f,
+          alphaEnd = 0.00f,
+          interpolator = AccelerateInterpolator(1.05f),
+          timeCutoff = 0.97f,
+          oneShot = true
+        )
+      )
+      set.attach(targetView)
+      set.start()
+    }
+  }
   //</editor-fold>
+
+  fun startOneshot() {
+    oneShotDropletView?.let { view ->
+      if (view.animation == null) constructOneshotAnimation(
+        dropletsMaxDuration,
+        dropletsEndsizeMax
+      ) //todo this will be called every start anim!
+      animateOneshot(view, dropletsEndsizeMax)
+    }
+  }
 
   //<editor-fold desc="Creating animations primitives (scaling and alpha fadeout)">
   private fun createScalingAnimation(parentContainer: View, duration: Millis, startTime: Millis, repeatDelay: Millis,
@@ -815,7 +890,7 @@ open class AnimatedDropletWidget : FrameLayout {
         "dropletsLayersCount: " +
         "$dropletsLayersCount\n" +
         "backgroundLayersCount: $backgroundLayersCount\n" +
-        "oneshotLayersCount: $oneshotLayersCount\n" +
+//        "oneshotLayersCount: $oneshotLayersCount\n" +
         "globalRandomInfluence: $globalRandomInfluence\n" +
         "dropletsMaxDuration: $dropletsMaxDuration\n" +
         "dropletsColour: $dropletsColour\n" +

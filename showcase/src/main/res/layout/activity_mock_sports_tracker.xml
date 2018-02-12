@@ -43,6 +43,7 @@
     app:layout_constraintStart_toStartOf="@id/guideline15"
     android:layout_marginStart="16dp"
     app:global_max_duration_ms="1000"
+    app:preset="none"
     app:layout_constraintBottom_toTopOf="@id/guideline18"
     app:layout_constraintTop_toBottomOf="@id/guideline19"
     app:layout_constraintDimensionRatio="1:1"
